@@ -45,30 +45,57 @@ class Textbox(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self,img, loc):
+    def __init__(self,img, loc, grp):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_image(img,-1)
         self.loc = loc
+        self.clicked = False
+        self.group = grp
 
     def draw(self):
-        pygame.draw.rect(self.img, pygame.Rect())
+        pygame.draw.rect(self.img, pygame.Rect(self.rect))
 
-    def update(self):
+
+    def update(self, click_pos):
+        if self.loc == click_pos:
+            self.clicked = True
+            self.remove()
+
+
+
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, loc):
         pygame.sprite.Sprite.__init__(self)
 
-
-class Scene(pygame.sprite.Group):
+class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
+
+
+
+class Scene(pygame.sprite.LayeredUpdates):
+    def __init__(self):
+        pygame.sprite.LayeredUpdates.__init__(self)
         self.backgrounds = []
         self.messages = []
+        self.items = pygame.sprite.Group()
+        self.curren_disp = pygame.sprite.Group
+
+    def draw(self):
+        self.
+        self.messages.draw()
+        self.items.draw()
+
+    def update(self, click_pos):
+        for item in self.items.sprites():
+            item.update(click_pos)
+        pygame.sprite.Group.
 
 class GameModel(object):
     def __init__(self):
         self.scenes = []
+        self.inventory = Inventory()
 
 
 class PygameWindowView(object):
