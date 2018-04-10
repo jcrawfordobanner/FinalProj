@@ -6,23 +6,23 @@ import time
 
 
 class Backdrop(object):
-    def __init__(self, image_loc, scrn):
+    def __init__(self, image_name):
 
-        self.image = pygame.image.load(image_loc)
+        self.image = pygame.image.load(image_name)
         self.rect = self.image.get_rect()
 
-    def draw(self):
-        self.image.blit(self.image, (0,0))
+    def draw(self, scrn, loc):
+        scrn.blit(self.image, loc = (0,0))
         #pygame.display.update()
 
-class Background(pygame.Surface):
-    # Constructor. Pass in the color of the block,
-    # and its x and y position
-     def __init__(self,img):
-        self.image, self.rect = load_image(img,-1)
-
-     def draw(self):
-        pygame.display.update()
+# class Background(pygame.Surface):
+#     # Constructor. Pass in the color of the block,
+#     # and its x and y position
+#      def __init__(self,img):
+#         self.image, self.rect = load_image(img,-1)
+#
+#      def draw(self):
+#         pygame.display.update()
 
 class Textbox(pygame.sprite.Sprite):
 
@@ -47,22 +47,19 @@ class Textbox(pygame.sprite.Sprite):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self,img, loc, grp):
+    def __init__(self, img, loc):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image(img,-1)
+        self.image, self.rect = load_image(img,-1) #see if needs fixing
         self.loc = loc
         self.clicked = False
-        self.group = grp
 
-    def draw(self):
-        pygame.draw.rect(self.img, pygame.Rect(self.rect))
+    def draw(self, scrn):
+        scrn.blit(self.image, self.loc)
 
 
     def update(self, click_pos):
         if self.loc == click_pos:
             self.clicked = True
-            self.remove()
-
 
 class Character(pygame.sprite.Sprite):
     def __init__(self, loc):
@@ -72,19 +69,20 @@ class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
 
-        
-
-
 
 class Room(pygame.sprite.LayeredUpdates):
-    def __init__(self, msgs, items):
+    def __init__(self, msgs, items, scrn):
         pygame.sprite.LayeredUpdates.__init__(self)
         self.messages = msgs
         self.items = items
+        self.items_vis = []
+        for i in range(len(items)):
+            if items[i].beenclicked == False:
+                self.items_vis.append(items[i])
 
-    def draw(self):
-        self.messages.draw()
-        self.items.draw()
+    def draw(self, scrn):
+        for item in self.items_vis:
+            item.draw(scrn)
 
     def update(self, click_pos):
         for item in self.items.sprites():
@@ -99,13 +97,14 @@ class GameModel(object):
 
 
 class PygameWindowView(object):
-    def __init__(self, backdrp ,width = 640,height = 480):
+    def __init__(self, width = 640,height = 480):
         size = (width,height)
-        #pygame.display.init()
+        pygame.display.init()
         self.screen = pygame.display.set_mode(size)
         self.backdrop = backdrp
-    def draw(self):
-        self.backdrop.draw()
+
+    def draw(self, model):
+
         pygame.display.update()
 
 
@@ -116,3 +115,5 @@ class MouseController(object):
 
 if __name__ == '__main__':
     pygame.init()
+    stock = Backdrop("StockPhoto1.jpg")
+    SCRNtemp = PygameWindowView(stock)
