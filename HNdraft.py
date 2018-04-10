@@ -5,13 +5,15 @@ from pygame.locals import*
 import time
 
 
-class Backdrop(pygame.Surface):
-    def __init__(self, image):
-        pygame.Surface.__init__()
-        self.image = image
+class Backdrop(object):
+    def __init__(self, image_loc, scrn):
+
+        self.image = pygame.image.load(image_loc)
+        self.rect = self.image.get_rect()
 
     def draw(self):
-        self.blit(self.image)
+        self.image.blit(self.image, (0,0))
+        #pygame.display.update()
 
 class Background(pygame.Surface):
     # Constructor. Pass in the color of the block,
@@ -62,8 +64,6 @@ class Item(pygame.sprite.Sprite):
             self.remove()
 
 
-
-
 class Character(pygame.sprite.Sprite):
     def __init__(self, loc):
         pygame.sprite.Sprite.__init__(self)
@@ -72,34 +72,47 @@ class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
 
+        
 
 
-class Scene(pygame.sprite.LayeredUpdates):
-    def __init__(self):
+
+class Room(pygame.sprite.LayeredUpdates):
+    def __init__(self, msgs, items):
         pygame.sprite.LayeredUpdates.__init__(self)
-        self.backgrounds = []
-        self.messages = []
-        self.items = pygame.sprite.Group()
-        self.curren_disp = pygame.sprite.Group
+        self.messages = msgs
+        self.items = items
 
     def draw(self):
-        self.
         self.messages.draw()
         self.items.draw()
 
     def update(self, click_pos):
         for item in self.items.sprites():
             item.update(click_pos)
-        pygame.sprite.Group.
+
 
 class GameModel(object):
     def __init__(self):
+
         self.scenes = []
         self.inventory = Inventory()
 
 
 class PygameWindowView(object):
-    def __init__(self,model,width,height):
-        self.model = model
+    def __init__(self, backdrp ,width = 640,height = 480):
         size = (width,height)
-        self.model.screen = pygame.display.set_mode(size)
+        #pygame.display.init()
+        self.screen = pygame.display.set_mode(size)
+        self.backdrop = backdrp
+    def draw(self):
+        self.backdrop.draw()
+        pygame.display.update()
+
+
+
+class MouseController(object):
+    def __init__(self, model):
+        self.model = model
+
+if __name__ == '__main__':
+    pygame.init()
