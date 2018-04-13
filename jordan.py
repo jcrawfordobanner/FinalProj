@@ -12,6 +12,14 @@ class Items(pygame.sprite.Sprite):
         self.image, self.rect = load_image(img,-1)
 
 
+class Inventory(pygame.sprite.Group):
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+        self.items = []
+    def add_item(self, item):
+        self.items.append(item)
+
+
 class Characters(pygame.sprite.Sprite):
 
     # Constructor. Pass in the color of the block,
@@ -53,11 +61,11 @@ class Textbox(pygame.Surface):
         self.rectin.y=1000
 
 
-     def zewords(self,text,surface):
+     def zewords(self,text):
         pygame.font.init()
         myfont = pygame.font.SysFont('Comic Sans MS', 28)
-        textsurface = myfont.render(text)
-        surface.blit(textsurface)
+        self.textsurface = myfont.render(text, False,(0,0,0))
+        self.imagein.blit(self.textsurface,(0,0))
 
 class PyManMain:
     """The Main PyMan Class - This class handles the main
@@ -74,21 +82,38 @@ class PyManMain:
         self.screen = pygame.display.set_mode((self.width
                                                , self.height))
 
-    def MainLoop(self):
-        running = True
-        screen = pygame.display.set_mode((self.width, self.height))
-        self.screen.fill((255,255,255))
-        self.screen.blit(pygame.image.load('images.jpeg'),(0,0))
-        pygame.display.update
+    def make_textbox(self):
         self.textbox=Textbox(self.width,self.height/4)
         self.screen.blit(self.textbox.imageout,(0,self.height-(self.height/4)))
         self.screen.blit(self.textbox.imagein,(30,int(self.height*0.75)+15))
+
+    def update_textbox(self,words):
+        self.make_textbox()
+        self.textbox.zewords(words)
+        self.screen.blit(self.textbox.imagein,(30,int(self.height*0.75)+15))
+
+    #def event(key):
+        #if key == K_l:
+
+
+    def MainLoop(self):
+        running = True
+        self.update_textbox("You are in a room with two doors, a TV and a rubber duck.")
+        pygame.display.update()
+        pygame.time.wait(1000)
+        self.update_textbox("Please choose one of the following:")
         pygame.display.update()
         while running:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running=False
+                elif event.type == KEYDOWN:
+                    if ((event.key == K_l)
+                    or (event.key == K_k)
+                    or (event.key == K_i)
+                    or (event.key == K_j)):
+                        self.event(event.key)
 
 
 if __name__ == "__main__":
