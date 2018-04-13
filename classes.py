@@ -18,7 +18,7 @@ class Textbox(pygame.Surface):
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-     def __init__(self,width,height):
+    def __init__(self,width,height):
         pygame.Surface.__init__(self,(width,height))
         pygame.sprite.Sprite.__init__(self)
 
@@ -46,6 +46,20 @@ class Textbox(pygame.Surface):
         self.rectin.x=0
         self.rectin.y=1000
 
+    def zewords(self,text):
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 28)
+        self.textsurface = myfont.render(text, False,(0,0,0))
+        self.imagein.blit(self.textsurface,(0,0))
+
+    def draw(self, screen):
+        size=screen.get_size()
+        screen.blit(self.imageout, (0, size[1]-(size[1]/4)))
+        screen.blit(self.imagein, (30,int(size[1]*0.75)+15))
+
+    def update(self, words):
+        self.zewords(words)
+
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, img, loc):
@@ -57,7 +71,6 @@ class Item(pygame.sprite.Sprite):
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
-
 
     def update(self, click_pos):
         if self.loc == click_pos:
@@ -93,3 +106,7 @@ class Room(pygame.sprite.LayeredUpdates):
     def update(self, click_pos):
         for item in self.items.sprites():
             item.update(click_pos)
+
+class Narrative(object):
+    def __init__(self):
+        self.events = {}

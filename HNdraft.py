@@ -20,7 +20,7 @@ class Textbox(pygame.Surface):
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-     def __init__(self,width,height):
+    def __init__(self,width,height):
         pygame.Surface.__init__(self,(width,height))
         pygame.sprite.Sprite.__init__(self)
 
@@ -49,14 +49,15 @@ class Textbox(pygame.Surface):
         self.rectin.y=1000
 
     def zewords(self,text):
-       pygame.font.init()
-       myfont = pygame.font.SysFont('Comic Sans MS', 28)
-       self.textsurface = myfont.render(text, False,(0,0,0))
-       self.imagein.blit(self.textsurface,(0,0))
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 28)
+        self.textsurface = myfont.render(text, False,(0,0,0))
+        self.imagein.blit(self.textsurface,(0,0))
 
     def draw(self, screen):
-        sreen.blit(self.imageout, (0, screen.height-(screen.height/4)))
-        sreen.blit(self.imagein, (30,int(screen.height*0.75)+15))
+        size=screen.get_size()
+        screen.blit(self.imageout, (0, size[1]-(size[1]/4)))
+        screen.blit(self.imagein, (30,int(size[1]*0.75)+15))
 
     def update(self, words):
         self.zewords(words)
@@ -118,11 +119,11 @@ class SpaceGameModel(object):
         self.allrooms = rooms
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
+        self.textbox=Textbox(640,480/4)
 
     def draw(self, scrn):
         self.room.draw(scrn)
-
-    def update(self, click_pos):
+        self.textbox.draw(scrn)
 
 
 class PygameWindowView(object):

@@ -1,4 +1,4 @@
-class MouseController(object):
+class KeyBoardController(object):
     """ Handles input for space game """
     def __init__(self, model):
         self.model = model
