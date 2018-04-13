@@ -20,7 +20,7 @@ class Textbox(pygame.Surface):
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-     def __init__(self,width,height):
+    def __init__(self, text, width,height):
         pygame.Surface.__init__(self,(width,height))
         pygame.sprite.Sprite.__init__(self)
 
@@ -48,38 +48,36 @@ class Textbox(pygame.Surface):
         self.rectin.x=0
         self.rectin.y=1000
 
-    def zewords(self,text):
-       pygame.font.init()
-       myfont = pygame.font.SysFont('Comic Sans MS', 28)
-       self.textsurface = myfont.render(text, False,(0,0,0))
-       self.imagein.blit(self.textsurface,(0,0))
+        pygame.font.init()
+        myfont = pygame.font.SysFont('Comic Sans MS', 28)
+        self.text = text
+        self.textsurface = myfont.render(text, False,(0,0,0))
+        self.imagein.blit(self.textsurface,(0,0))
 
     def draw(self, screen):
         sreen.blit(self.imageout, (0, screen.height-(screen.height/4)))
         sreen.blit(self.imagein, (30,int(screen.height*0.75)+15))
 
     def update(self, words):
-        self.zewords(words)
+        self.text = words
 
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, img, loc):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load(img) #see if needs fixing
+        self.image= pygame.image.load(img)
         self.rect = self.image.get_rect()
+        self.rect.move(loc)
         self.loc = loc
-        self.clicked = False
+        self.hidd= False
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
-    def update(self, click_pos):
-        if self.loc == click_pos:
-            self.clicked = True
+    def update(self):
+        pass # not sure if need to update this here
 
-class Character(pygame.sprite.Sprite):
-    def __init__(self, loc):
-        pygame.sprite.Sprite.__init__(self)
+
 
 class Inventory(pygame.sprite.Group):
     def __init__(self):
@@ -95,18 +93,19 @@ class Room(pygame.sprite.LayeredUpdates):
         self.items = items
         self.backdrop = backdrops
         self.items_vis = []
-        for i in range(len(items)):
-            if items[i].clicked == False:
-                self.items_vis.append(items[i])
+        for k in range(len(items)):
+            if items[k].hidd == False:
+                self.items_vis.append(items[k])
 
     def draw(self, scrn):
         self.backdrop.draw(scrn)
         for item in self.items_vis:
             item.draw(scrn)
 
-    def update(self, click_pos):
-        for item in self.items.sprites():
-            item.update(click_pos)
+    def update(self):
+        for m in self.messages:
+            m.update(words)
+
 
 class Narrative(object):
     def __init__(self):
@@ -122,7 +121,10 @@ class SpaceGameModel(object):
     def draw(self, scrn):
         self.room.draw(scrn)
 
-    def update(self, click_pos):
+    def update(self, click_pos, click):
+        for r in self.allrooms:
+            r.update()
+
 
 
 class PygameWindowView(object):
