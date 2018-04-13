@@ -1,3 +1,5 @@
+import pygame
+
 class PygameWindowView(object):
     def __init__(self, model, width = 640,height = 480):
         pygame.init()

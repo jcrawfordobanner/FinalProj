@@ -1,4 +1,4 @@
-class KeyBoardController(object):
+class MouseController(object):
     """ Handles input for space game """
     def __init__(self, model):
         self.model = model
@@ -8,6 +8,7 @@ class KeyBoardController(object):
         if event.type != KEYDOWN:
             return
         if event.key == pygame.K_LEFT:
+            s=2
             #action
         if event.key == pygame.K_RIGHT:
-            #action
+            s=1
