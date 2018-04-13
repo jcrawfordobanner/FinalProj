@@ -6,9 +6,10 @@ import time
 
 
 class Backdrop(object):
-    def __init__(self, image_name):
+    def __init__(self, image_name, size):
 
-        self.image = pygame.image.load(image_name)
+        im = pygame.image.load(image_name)
+        self.image = pygame.transform.scale(im, size)
         self.rect = self.image.get_rect()
 
     def draw(self, scrn, loc = (0,0)):
@@ -130,13 +131,18 @@ class MouseController(object):
     def __init__(self, model):
         self.model = model
 
+
+def ratio_scale(im, scl_factor):
+    #TODO fill this one it 
+
 if __name__ == '__main__':
     pygame.init()
     running = True
     while running:
-        kiwi = Item("Wrench.jpg", (0,0))
-        stock = Backdrop("StockPhoto1.jpg")
-        room =  Room({}, [kiwi], stock)
+        wrench = Item("wrench.png", (200,200))
+        wrench.image = pygame.transform.scale(wrench.image, (50, 60))
+        stock = Backdrop("StockPhoto1.jpg", (640, 480))
+        room =  Room({}, [wrench], stock)
         rooms = {"bridge":room}
         Modl = SpaceGameModel(rooms)
 
