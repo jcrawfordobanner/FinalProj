@@ -98,6 +98,8 @@ class PyManMain:
 
     def MainLoop(self):
         running = True
+        self.make_textbox()
+        pygame.display.update()
         self.update_textbox("You are in a room with two doors, a TV and a rubber duck.")
         pygame.display.update()
         pygame.time.wait(1000)
