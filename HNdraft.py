@@ -14,16 +14,7 @@ class Backdrop(object):
 
     def draw(self, scrn, loc = (0,0)):
         scrn.blit(self.image, loc)
-        #pygame.display.update()
 
-# class Background(pygame.Surface):
-#     # Constructor. Pass in the color of the block,
-#     # and its x and y position
-#      def __init__(self,img):
-#         self.image, self.rect = load_image(img,-1)
-#
-#      def draw(self):
-#         pygame.display.update()
 
 class Textbox(pygame.Surface):
 
@@ -57,6 +48,19 @@ class Textbox(pygame.Surface):
         self.rectin.x=0
         self.rectin.y=1000
 
+    def zewords(self,text):
+       pygame.font.init()
+       myfont = pygame.font.SysFont('Comic Sans MS', 28)
+       self.textsurface = myfont.render(text, False,(0,0,0))
+       self.imagein.blit(self.textsurface,(0,0))
+
+    def draw(self, screen):
+        sreen.blit(self.imageout, (0, screen.height-(screen.height/4)))
+        sreen.blit(self.imagein, (30,int(screen.height*0.75)+15))
+
+    def update(self, words):
+        self.zewords(words)
+
 
 class Item(pygame.sprite.Sprite):
     def __init__(self, img, loc):
@@ -68,7 +72,6 @@ class Item(pygame.sprite.Sprite):
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
-
 
     def update(self, click_pos):
         if self.loc == click_pos:
@@ -105,6 +108,10 @@ class Room(pygame.sprite.LayeredUpdates):
         for item in self.items.sprites():
             item.update(click_pos)
 
+class Narrative(object):
+    def __init__(self):
+        self.events = {}
+
 
 class SpaceGameModel(object):
     def __init__(self, rooms):
@@ -114,6 +121,9 @@ class SpaceGameModel(object):
 
     def draw(self, scrn):
         self.room.draw(scrn)
+
+    def update(self, click_pos):
+
 
 class PygameWindowView(object):
     def __init__(self, model, width = 640,height = 480):
@@ -133,7 +143,7 @@ class MouseController(object):
 
 
 def ratio_scale(im, scl_factor):
-    #TODO fill this one it 
+    orig_size = im.get_rect()
 
 if __name__ == '__main__':
     pygame.init()
@@ -141,7 +151,7 @@ if __name__ == '__main__':
     while running:
         wrench = Item("wrench.png", (200,200))
         wrench.image = pygame.transform.scale(wrench.image, (50, 60))
-        stock = Backdrop("StockPhoto1.jpg", (640, 480))
+        stock = Backdrop("StockPhoto1.jpg", (1000, 1000))
         room =  Room({}, [wrench], stock)
         rooms = {"bridge":room}
         Modl = SpaceGameModel(rooms)
