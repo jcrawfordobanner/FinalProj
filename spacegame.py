@@ -25,8 +25,8 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-        Modl.update()
+        pygame.time.wait(1000)
+        Modl.update('SHIT ROCK UGH')
         SCRNtemp.draw()
-        time.sleep(.001)
 
     pygame.quit()
