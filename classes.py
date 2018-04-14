@@ -4,6 +4,7 @@ import time
 
 
 class Backdrop(object):
+    """Makes a pygame surface object using an input picture as the background"""
     def __init__(self, image_name, size):
 
         im = pygame.image.load(image_name)
@@ -15,6 +16,7 @@ class Backdrop(object):
 
 
 class Textbox(pygame.Surface):
+    """Class object that contains a message and a method to blit it to the screen"""
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
@@ -65,9 +67,10 @@ class Textbox(pygame.Surface):
 
 
 class Item(pygame.sprite.Sprite):
+    """Class inherits from pygame sprite and contains an interactive feature of the sceen"""
     def __init__(self, img, loc):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load(img) #see if needs fixing
+        self.image= pygame.image.load(img)
         self.rect = self.image.get_rect()
         self.loc = loc
         self.clicked = False
@@ -76,14 +79,12 @@ class Item(pygame.sprite.Sprite):
         scrn.blit(self.image, self.loc)
 
     def update(self, click_pos):
-        if self.loc == click_pos:
+        if self.loc == click_pos: #keeps track of the state of the item
             self.clicked = True
 
-class Character(pygame.sprite.Sprite):
-    def __init__(self, loc):
-        pygame.sprite.Sprite.__init__(self)
 
 class Inventory(pygame.sprite.Group):
+    """Inherits from sprite group class, and contains the items the player has collected"""
     def __init__(self):
         pygame.sprite.Group.__init__(self)
         self.items = []
@@ -91,6 +92,7 @@ class Inventory(pygame.sprite.Group):
         self.items.append(item)
 
 class Room(pygame.sprite.LayeredUpdates):
+    """Class containing all of the components of the game for a given room"""
     def __init__(self, msgs, items, backdrops):
         pygame.sprite.LayeredUpdates.__init__(self)
         self.messages = msgs
@@ -113,3 +115,6 @@ class Room(pygame.sprite.LayeredUpdates):
 class Narrative(object):
     def __init__(self):
         self.events = {}
+
+    #TODO fill this and figure this out
+    pass 
