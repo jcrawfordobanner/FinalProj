@@ -1,3 +1,5 @@
+#Dictates how the player can interact with the model
+
 class MouseController(object):
     """ Handles input for space game """
     def __init__(self, model):
