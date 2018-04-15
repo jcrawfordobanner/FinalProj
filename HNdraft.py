@@ -70,6 +70,7 @@ class Item(pygame.sprite.Sprite):
         self.rect.move(loc)
         self.loc = loc
         self.hidd= False
+        self.clicked = False
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
@@ -81,6 +82,7 @@ class Item(pygame.sprite.Sprite):
 class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
+        self.takeable_items = []
         self.items = []
     def add_item(self, item):
         self.items.append(item)
@@ -112,18 +114,25 @@ class Narrative(object):
 
 
 class SpaceGameModel(object):
+    """Model of the game"""
     def __init__(self, rooms):
         self.allrooms = rooms
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
+        self.textbox=Textbox(640,480/4)
 
     def draw(self, scrn):
         self.room.draw(scrn)
+        self.textbox.draw(scrn)
 
-    def update(self, click_pos, click):
-        for r in self.allrooms:
-            r.update()
-
+    def update(self,words='hoi'):
+        """Changes the model based upon new information"""
+        #for r in self.allrooms:
+            #r.update()
+        self.textbox.update(words)
+        for room in self.rooms:
+            room.update()
+        self.inventory.update()
 
 
 class PygameWindowView(object):
@@ -138,9 +147,28 @@ class PygameWindowView(object):
         self.model.draw(self.screen)
         pygame.display.update()
 
+
 class MouseController(object):
+    """ Handles input for space game """
     def __init__(self, model):
         self.model = model
+
+    def handle_event(self, event):
+        """ Event handler"""
+        if event.type != KEYDOWN:
+            return
+        if event.key == pygame.K_LEFT:
+            s=2
+            #action
+        if event.key == pygame.K_RIGHT:
+            s=1
+        if event.type == pygame.MOUSEDOWN:
+            pos = pygame.mouse.get_pos()
+            for item in self.model.room.items:
+                if event.rect.collidepoint(pos):
+                    event.clicked = True
+
+
 
 
 def ratio_scale(im, scl_factor):
@@ -148,18 +176,24 @@ def ratio_scale(im, scl_factor):
 
 if __name__ == '__main__':
     pygame.init()
+
+    wrench = Item("wrench.png", (200,200))
+    wrench.image = pygame.transform.scale(wrench.image, (50, 60))
+    stock = Backdrop("StockPhoto1.jpg", (640, 480))
+    room =  Room({}, [wrench], stock)
+    rooms = {"bridge":room}
+
+    Modl = SpaceGameModel(rooms)
+    SCRNtemp = PygameWindowView(Modl)
+    Contrl = MouseController(Modl)
+
     running = True
     while running:
-        wrench = Item("wrench.png", (200,200))
-        wrench.image = pygame.transform.scale(wrench.image, (50, 60))
-        stock = Backdrop("StockPhoto1.jpg", (1000, 1000))
-        room =  Room({}, [wrench], stock)
-        rooms = {"bridge":room}
-        Modl = SpaceGameModel(rooms)
-
-        SCRNtemp = PygameWindowView(Modl)
-        SCRNtemp.draw()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
+        pygame.time.wait(1000)
+        Modl.update('SHIT ROCK UGH')
+        SCRNtemp.draw()
+
+    pygame.quit()
