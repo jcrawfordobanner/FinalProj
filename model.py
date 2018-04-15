@@ -20,3 +20,6 @@ class SpaceGameModel(object):
         #for r in self.allrooms:
             #r.update()
         self.textbox.update(words)
+        for room in self.rooms:
+            room.update()
+        self.inventory.update()

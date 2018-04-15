@@ -78,7 +78,6 @@ class Item(pygame.sprite.Sprite):
         pass # not sure if need to update this here
 
 
-
 class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)

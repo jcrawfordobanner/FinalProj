@@ -117,4 +117,4 @@ class Narrative(object):
         self.events = {}
 
     #TODO fill this and figure this out
-    pass 
+    pass
