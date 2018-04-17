@@ -18,7 +18,7 @@ class Textbox(pygame.Surface):
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-    def __init__(self, width,height,text='hoi'):
+    def __init__(self, width,height,text=''):
         pygame.Surface.__init__(self,(width,height))
         pygame.sprite.Sprite.__init__(self)
 
@@ -115,27 +115,37 @@ class Room(pygame.sprite.LayeredUpdates):
             item.update(click_pos)
 
 class Narrative(object):
-    def __init__(self):
+    def __init__(self,model):
         self.events = [1,2,3,4]
+        self.model=model
 
-    def scene1(self,object):
-        object.update('You pressed the red button')
+    def scene1(self,model):
+        model.update('You pressed the red button')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Congratulations...you died')
+        model.update('Congratulations...you died')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Game Over')
-    def scene2(self,object):
-        object.update('You pressed the blue button')
+        model.update('Game Over')
+        actuallydraw()
+    def scene2(self,model):
+        model.update('You pressed the blue button')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Congratulations...you win')
+        model.update('Congratulations...you win')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Game Over')
-    def scene3(self,object):
-        object.update('You pressed the green button')
+        model.update('Game Over')
+        actuallydraw()
+    def scene3(self,model):
+        model.update('You pressed the green button')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Unfortunately nothing happened. You stay until you die of thirst')
+        model.update('Unfortunately nothing happened. You stay until you die of thirst')
+        actuallydraw()
         pygame.time.wait(3005)
-        object.update('Game Over')
+        model.update('Game Over')
+        actuallydraw()
 
 
 class SpaceGameModel(object):
@@ -150,7 +160,7 @@ class SpaceGameModel(object):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
 
-    def update(self,words='hoi'):
+    def update(self,words=''):
         """Changes the model based upon new information"""
         #for r in self.allrooms:
             #r.update()
@@ -161,16 +171,16 @@ class MouseController(object):
     def __init__(self, model):
         self.model = model
 
-    def handle_event(self, event,object):
+    def handle_event(self, event):
         """ Event handler"""
         if event.type != KEYDOWN:
             return
         if event == pygame.K_k:
-            story.scene1(object)
+            story.scene1(self.model)
         if event.key == pygame.K_l:
-            story.scene2(object)
+            story.scene2(self.model)
         if event.key == pygame.K_l:
-            story.scene3(object)
+            story.scene3(self.model)
 
 class PygameWindowView(object):
     """Draws the model"""
@@ -187,7 +197,8 @@ class PygameWindowView(object):
 
 current_event = 0
 
-story =Narrative()
+
+
 
 if __name__ == '__main__':
     pygame.init()
@@ -202,12 +213,22 @@ if __name__ == '__main__':
     SCRNtemp = PygameWindowView(Modl)
     Contrl = MouseController(Modl)
 
+    story =Narrative(Modl)
+    def actuallydraw():
+            SCRNtemp.draw()
+            SCRNtemp.draw()
 
-    Modl.update('You have awoke inside of a room. In it you see three buttons, one red, one blue and one green, What do you do')
-    SCRNtemp.draw()
-    pygame.time.wait(1)
-    Modl.update('j:red k:blue l;:green')
-    SCRNtemp.draw()
+    Modl.update('You have awoke inside of a room.')
+    actuallydraw()
+    pygame.time.wait(3005)
+    Modl.update('In it you see three buttons, one red, one blue and one green.')
+    actuallydraw()
+    pygame.time.wait(3005)
+    Modl.update('What do you do?')
+    actuallydraw()
+    pygame.time.wait(3005)
+    Modl.update('j: red k: blue l: green')
+    actuallydraw()
     current_event=1
 
     running = True
@@ -215,6 +236,6 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-            Contrl.handle_event(event,Modl)
+            Contrl.handle_event(event)
 
     pygame.quit()
