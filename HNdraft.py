@@ -20,13 +20,14 @@ class Textbox(pygame.Surface):
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-    def __init__(self, text, width,height):
-        pygame.Surface.__init__(self,(width,height))
+    def __init__(self, text, size):
+        pygame.Surface.__init__(self,size)
         pygame.sprite.Sprite.__init__(self)
-
+        self.width = size[0]
+        self.height = size[1]
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imageout = pygame.Surface((width,height))
+        self.imageout = pygame.Surface(size)
         self.imageout.fill((255,0,0))
 
         # Fetch the rectangle object that has the dimensions of the image
@@ -39,7 +40,7 @@ class Textbox(pygame.Surface):
 
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imagein = pygame.Surface((width*0.9,height*0.75))
+        self.imagein = pygame.Surface((self.width*0.9,self.height*0.75))
         self.imagein.fill((0,255,0))
 
         # Fetch the rectangle object that has the dimensions of the image
@@ -55,8 +56,8 @@ class Textbox(pygame.Surface):
         self.imagein.blit(self.textsurface,(0,0))
 
     def draw(self, screen):
-        sreen.blit(self.imageout, (0, screen.height-(screen.height/4)))
-        sreen.blit(self.imagein, (30,int(screen.height*0.75)+15))
+        screen.blit(self.imageout, (0, self.height-(self.height/4)))
+        screen.blit(self.imagein, (30,int(self.height*0.75)+15))
 
     def update(self, words):
         self.text = words
@@ -115,30 +116,31 @@ class Narrative(object):
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, rooms):
-        self.allrooms = rooms
+    def __init__(self):
+        self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
-        self.textbox=Textbox(640,480/4)
+        self.msgs = msgs # dictionary of all possible messages to be displayed on the textbox
+        self.textbox= Textbox("testing", (480, 640))
 
     def draw(self, scrn):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
 
-    def update(self,words='hoi'):
+    def update(self, words=None):
         """Changes the model based upon new information"""
         #for r in self.allrooms:
             #r.update()
-        self.textbox.update(words)
-        for room in self.rooms:
-            room.update()
+        if not words == None:
+            self.textbox.update(words)
+        for key in self.allrooms:
+            self.allrooms[key].update()
         self.inventory.update()
 
 
 class PygameWindowView(object):
-    def __init__(self, model, width = 640,height = 480):
+    def __init__(self, model, size):
         pygame.init()
-        size = (width,height)
         pygame.display.init()
         self.screen = pygame.display.set_mode(size)
         self.model = model
@@ -146,6 +148,8 @@ class PygameWindowView(object):
     def draw(self):
         self.model.draw(self.screen)
         pygame.display.update()
+
+
 
 
 class MouseController(object):
@@ -167,6 +171,7 @@ class MouseController(object):
             for item in self.model.room.items:
                 if event.rect.collidepoint(pos):
                     event.clicked = True
+                    self.model.update()
 
 
 
@@ -176,15 +181,17 @@ def ratio_scale(im, scl_factor):
 
 if __name__ == '__main__':
     pygame.init()
-
+    size = (1600, )
     wrench = Item("wrench.png", (200,200))
     wrench.image = pygame.transform.scale(wrench.image, (50, 60))
-    stock = Backdrop("StockPhoto1.jpg", (640, 480))
-    room =  Room({}, [wrench], stock)
-    rooms = {"bridge":room}
+    stock = Backdrop("StockPhoto1.jpg", size)
 
-    Modl = SpaceGameModel(rooms)
-    SCRNtemp = PygameWindowView(Modl)
+
+    msgs = {}
+    rooms = {'bridge':Room({}, [wrench], stock)}
+    Modl = SpaceGameModel()
+    print(Modl.allrooms)
+    SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
 
     running = True
