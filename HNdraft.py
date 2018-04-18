@@ -9,7 +9,8 @@ class Backdrop(object):
     def __init__(self, image_name, size):
 
         im = pygame.image.load(image_name)
-        self.image = pygame.transform.scale(im, size)
+        self.size = (size[0], int(size[1]*4/5))
+        self.image = pygame.transform.scale(im, self.size)
         self.rect = self.image.get_rect()
 
     def draw(self, scrn, loc = (0,0)):
@@ -24,17 +25,17 @@ class Textbox(pygame.Surface):
         pygame.Surface.__init__(self,size)
         pygame.sprite.Sprite.__init__(self)
         self.width = size[0]
-        self.height = size[1]
+        self.height = size[1]/5
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imageout = pygame.Surface(size)
+        self.imageout = pygame.Surface((self.width,self.height))
         self.imageout.fill((255,0,0))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectout = self.imageout.get_rect()
         self.rectout.x=0
-        self.rectout.y=1000
+        self.rectout.y= size[1]- self.height
 
         pygame.sprite.Sprite.__init__(self)
 
@@ -46,8 +47,8 @@ class Textbox(pygame.Surface):
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectin = self.imagein.get_rect()
-        self.rectin.x=0
-        self.rectin.y=1000
+        self.rectin.x=  int((self.width - self.width*0.9)/2)
+        self.rectin.y= size[1]-self.height +  int((self.height-self.height*0.75)/2)
 
         pygame.font.init()
         myfont = pygame.font.SysFont('Comic Sans MS', 28)
@@ -56,8 +57,8 @@ class Textbox(pygame.Surface):
         self.imagein.blit(self.textsurface,(0,0))
 
     def draw(self, screen):
-        screen.blit(self.imageout, (0, self.height-(self.height/4)))
-        screen.blit(self.imagein, (30,int(self.height*0.75)+15))
+        screen.blit(self.imageout, (0, self.rectout.y))
+        screen.blit(self.imagein, (self.rectin.x,self.rectin.y))
 
     def update(self, words):
         self.text = words
@@ -72,6 +73,7 @@ class Item(pygame.sprite.Sprite):
         self.loc = loc
         self.hidd= False
         self.clicked = False
+        self.take = True
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
@@ -92,12 +94,15 @@ class Room(pygame.sprite.LayeredUpdates):
     def __init__(self, msgs, items, backdrops):
         pygame.sprite.LayeredUpdates.__init__(self)
         self.messages = msgs
-        self.items = items
+        self.items = []
+        for item in items:
+            self.add(item)
+            self.items.append(item)
         self.backdrop = backdrops
         self.items_vis = []
-        for k in range(len(items)):
-            if items[k].hidd == False:
-                self.items_vis.append(items[k])
+        for item in self.items:
+            if not item.hidd:
+                self.items_vis.append(item)
 
     def draw(self, scrn):
         self.backdrop.draw(scrn)
@@ -116,12 +121,12 @@ class Narrative(object):
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self):
+    def __init__(self, size, rooms, msgs):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
         self.msgs = msgs # dictionary of all possible messages to be displayed on the textbox
-        self.textbox= Textbox("testing", (480, 640))
+        self.textbox= Textbox(self.msgs["start_msg"], size)
 
     def draw(self, scrn):
         self.room.draw(scrn)
@@ -133,6 +138,7 @@ class SpaceGameModel(object):
             #r.update()
         if not words == None:
             self.textbox.update(words)
+            #self.draw(scrn)
         for key in self.allrooms:
             self.allrooms[key].update()
         self.inventory.update()
@@ -159,19 +165,20 @@ class MouseController(object):
 
     def handle_event(self, event):
         """ Event handler"""
-        if event.type != KEYDOWN:
+        if event.type != KEYDOWN or MOUSEBUTTONDOWN:
             return
-        if event.key == pygame.K_LEFT:
-            s=2
-            #action
-        if event.key == pygame.K_RIGHT:
-            s=1
-        if event.type == pygame.MOUSEDOWN:
+
+        if event == pygame.MOUSEDOWN:
             pos = pygame.mouse.get_pos()
-            for item in self.model.room.items:
-                if event.rect.collidepoint(pos):
-                    event.clicked = True
-                    self.model.update()
+            print(pos)
+            for sprite in self.model.room.sprites():
+                if sprite.rect.collidepoint(pos):
+                    item.clicked = True
+                    self.model.update("thats a wrench??!!!>!")
+                    print("please")
+                    self.model.draw()
+                    self.model.draw()
+                    return
 
 
 
@@ -181,15 +188,13 @@ def ratio_scale(im, scl_factor):
 
 if __name__ == '__main__':
     pygame.init()
-    size = (1600, )
+    size = (1200, 900)
     wrench = Item("wrench.png", (200,200))
-    wrench.image = pygame.transform.scale(wrench.image, (50, 60))
     stock = Backdrop("StockPhoto1.jpg", size)
 
-
-    msgs = {}
+    msgs = {"start_msg": "whots up u r in space u fool"}
     rooms = {'bridge':Room({}, [wrench], stock)}
-    Modl = SpaceGameModel()
+    Modl = SpaceGameModel(size, rooms, msgs)
     print(Modl.allrooms)
     SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
