@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import*
 import time
 
+flag1=False
 
 class Backdrop(object):
     def __init__(self, image_name, size):
@@ -116,34 +117,71 @@ class Room(pygame.sprite.LayeredUpdates):
 
 class Narrative(object):
     def __init__(self,model):
-        self.events = [1,2,3,4]
+        self.events = {'1':False,'2':False,'3':False,'4':False,'5':False}
         self.model=model
 
     def scene1(self,model):
         model.update('You pressed the red button')
         actuallydraw()
-        pygame.time.wait(3005)
-        model.update('Congratulations...you died')
-        actuallydraw()
-        pygame.time.wait(3005)
-        model.update('Game Over')
+        pygame.time.wait(1005)
+        model.update('A door opens to your right')
         actuallydraw()
     def scene2(self,model):
         model.update('You pressed the blue button')
         actuallydraw()
-        pygame.time.wait(3005)
-        model.update('Congratulations...you win')
+        pygame.time.wait(1005)
+        model.update('Congratulations...you suck')
         actuallydraw()
-        pygame.time.wait(3005)
+        pygame.time.wait(1005)
         model.update('Game Over')
         actuallydraw()
     def scene3(self,model):
         model.update('You pressed the green button')
         actuallydraw()
-        pygame.time.wait(3005)
+        pygame.time.wait(1005)
         model.update('Unfortunately nothing happened. You stay until you die of thirst')
         actuallydraw()
-        pygame.time.wait(3005)
+        pygame.time.wait(1005)
+        model.update('Game Over')
+        actuallydraw
+
+    def intro(self,model):
+        pygame.time.wait(1005)
+        model.update('You are now in the bridge')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('There is a paper clip and toothbrush and stapler')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('j:paper clip k:toothbrush l:stapler')
+        actuallydraw()
+
+
+    def scene4(self,model):
+        model.update('You picked up the paper clip')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('You stab yourself in the eye')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('You die')
+        actuallydraw()
+    def scene5(self,model):
+        model.update('You picked up the toothbrush')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('Why would you ever need a toothbrush you idiot')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('Game Over')
+        actuallydraw()
+    def scene6(self,model):
+        model.update('You picked up the stapler')
+        actuallydraw()
+        pygame.time.wait(1005)
+        model.update('Sadly it has no use to you because youre not Mcgyver')
+        actuallydraw()
+        pygame.time.wait(1005)
         model.update('Game Over')
         actuallydraw()
 
@@ -155,12 +193,12 @@ class SpaceGameModel(object):
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
         self.textbox=Textbox(640,480/4)
-
     def draw(self, scrn):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
 
     def update(self,words=''):
+
         """Changes the model based upon new information"""
         #for r in self.allrooms:
             #r.update()
@@ -175,12 +213,29 @@ class MouseController(object):
         """ Event handler"""
         if event.type != KEYDOWN:
             return
-        if event == pygame.K_k:
-            story.scene1(self.model)
-        if event.key == pygame.K_l:
-            story.scene2(self.model)
-        if event.key == pygame.K_l:
-            story.scene3(self.model)
+        if story.events.get('1')==True:
+            if event.key == pygame.K_j:
+                story.scene1(self.model)
+                story.events['1']=False
+                story.events['2']=True
+                story.intro(self.model)
+            if event.key == pygame.K_k:
+                story.scene2(self.model)
+                story.events['1']=False
+            if event.key == pygame.K_l:
+                story.scene3(self.model)
+                story.events['1']=False
+
+        elif story.events.get('2')==True:
+            if event.key == pygame.K_j:
+                story.scene4(self.model)
+                story.events['2']=False
+            if event.key == pygame.K_k:
+                story.scene5(self.model)
+                story.events['2']=False
+            if event.key == pygame.K_l:
+                story.scene6(self.model)
+                story.events['2']=False
 
 class PygameWindowView(object):
     """Draws the model"""
@@ -199,10 +254,8 @@ current_event = 0
 
 
 
-
 if __name__ == '__main__':
     pygame.init()
-
     wrench = Item("wrench.png", (200,200))
     wrench.image = pygame.transform.scale(wrench.image, (50, 60))
     stock = Backdrop("StockPhoto1.jpg", (640, 480))
@@ -214,22 +267,25 @@ if __name__ == '__main__':
     Contrl = MouseController(Modl)
 
     story =Narrative(Modl)
+
+
     def actuallydraw():
             SCRNtemp.draw()
             SCRNtemp.draw()
 
     Modl.update('You have awoke inside of a room.')
     actuallydraw()
-    pygame.time.wait(3005)
+    pygame.time.wait(1005)
     Modl.update('In it you see three buttons, one red, one blue and one green.')
     actuallydraw()
-    pygame.time.wait(3005)
+    pygame.time.wait(1005)
     Modl.update('What do you do?')
     actuallydraw()
-    pygame.time.wait(3005)
+    pygame.time.wait(1005)
     Modl.update('j: red k: blue l: green')
     actuallydraw()
-    current_event=1
+
+    story.events['1'] = True
 
     running = True
     while running:
