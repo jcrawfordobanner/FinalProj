@@ -65,21 +65,27 @@ class Textbox(pygame.Surface):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, img, loc):
+    def __init__(self, img, loc, scl = 1):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load(img)
-        self.rect = self.image.get_rect()
-        self.rect.move(loc)
+        self.image= ratio_scale(img, scl)
+        self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
         self.loc = loc
         self.hidd= False
-        self.clicked = False
         self.take = True
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
-    def update(self):
-        pass # not sure if need to update this here
+    def click(self,pos):
+        if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
+            return True
+        else:
+            return False
+
+    def update(self, pos):
+        if self.click(pos):
+            if self.take:
+                self.hidd = True
 
 
 class Inventory(pygame.sprite.Group):
@@ -91,7 +97,7 @@ class Inventory(pygame.sprite.Group):
         self.items.append(item)
 
 class Room(pygame.sprite.LayeredUpdates):
-    def __init__(self, msgs, items, backdrops):
+    def __init__(self, items, backdrops):
         pygame.sprite.LayeredUpdates.__init__(self)
         self.messages = msgs
         self.items = []
@@ -109,9 +115,11 @@ class Room(pygame.sprite.LayeredUpdates):
         for item in self.items_vis:
             item.draw(scrn)
 
-    def update(self):
-        for m in self.messages:
-            m.update(words)
+    def update(self, pos):
+        for item in self.items_vis:
+            if item.click(pos):
+                self.items_vis.remove(item)
+            item.update(pos)
 
 
 class Narrative(object):
@@ -132,7 +140,7 @@ class SpaceGameModel(object):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
 
-    def update(self, words=None):
+    def update(self, pos, words=None):
         """Changes the model based upon new information"""
         #for r in self.allrooms:
             #r.update()
@@ -140,7 +148,7 @@ class SpaceGameModel(object):
             self.textbox.update(words)
             #self.draw(scrn)
         for key in self.allrooms:
-            self.allrooms[key].update()
+            self.allrooms[key].update(pos)
         self.inventory.update()
 
 
@@ -156,8 +164,6 @@ class PygameWindowView(object):
         pygame.display.update()
 
 
-
-
 class MouseController(object):
     """ Handles input for space game """
     def __init__(self, model):
@@ -165,37 +171,35 @@ class MouseController(object):
 
     def handle_event(self, event):
         """ Event handler"""
-        if event.type != KEYDOWN or MOUSEBUTTONDOWN:
-            return
-
-        if event == pygame.MOUSEDOWN:
+        if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             print(pos)
-            for sprite in self.model.room.sprites():
-                if sprite.rect.collidepoint(pos):
-                    item.clicked = True
-                    self.model.update("thats a wrench??!!!>!")
+            for item in self.model.room.items_vis:
+                print(item.Rect)
+                if item.click(pos):
+                    self.model.update(pos,"thats a wrench??!!!>!")
                     print("please")
-                    self.model.draw()
-                    self.model.draw()
                     return
 
+        if event.type != KEYDOWN:
+            return
 
-
-
-def ratio_scale(im, scl_factor):
+def ratio_scale(filename, scl_factor):
+    im = pygame.image.load(filename)
     orig_size = im.get_rect()
+    image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
+    return image
 
 if __name__ == '__main__':
     pygame.init()
     size = (1200, 900)
-    wrench = Item("wrench.png", (200,200))
+    wrench = Item("wrench.png", (200,200), .75)
     stock = Backdrop("StockPhoto1.jpg", size)
 
     msgs = {"start_msg": "whots up u r in space u fool"}
-    rooms = {'bridge':Room({}, [wrench], stock)}
+    rooms = {'bridge':Room([wrench], stock)}
+
     Modl = SpaceGameModel(size, rooms, msgs)
-    print(Modl.allrooms)
     SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
 
@@ -204,8 +208,10 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-        pygame.time.wait(1000)
-        Modl.update('SHIT ROCK UGH')
+        Contrl.handle_event(event)
         SCRNtemp.draw()
+        time.sleep(.1)
+        #Modl.update('SHIT ROCK UGH')
+
 
     pygame.quit()
