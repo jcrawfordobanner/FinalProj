@@ -31,7 +31,7 @@ class Textbox(pygame.Surface):
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
         self.imageout = pygame.Surface((self.width,self.height))
-        self.imageout.fill((255,0,0))
+        self.imageout.fill((0, 50, 60))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
@@ -44,7 +44,7 @@ class Textbox(pygame.Surface):
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
         self.imagein = pygame.Surface((self.width*0.9,self.height*0.75))
-        self.imagein.fill((0,255,0))
+        self.imagein.fill((250,255,255))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
@@ -58,7 +58,7 @@ class Textbox(pygame.Surface):
 
     def draw(self, screen):
         screen.blit(self.imageout, (0, self.rectout.y))
-        self.imagein.fill((0,255,0))
+        self.imagein.fill((250,255,255))
         if isinstance(self.text, tuple):
             loc_y = 0
             for line in self.text:
@@ -105,6 +105,7 @@ class Inventory(pygame.sprite.Group):
         self.items = []
     def add_item(self, item):
         self.items.append(item)
+        self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):
     def __init__(self, items, backdrops):
@@ -147,29 +148,29 @@ class SpaceGameModel(object):
         self.room = self.allrooms["bridge"]
         self.inventory = Inventory()
         self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
-        self.messages = {"bridge_intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
-                "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'), 'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green')}
+        self.messages = {"bridge_intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler',
+                'j:paper clip k:toothbrush l:stapler'),
+                "scene1":('You pressed the red button', 'A door opens to your right'),
+                "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
+                'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green')}
  # dictionary of all possible messages to be displayed on the textbox
         self.textbox= Textbox(size, self.messages['game_intro'])
 
 
     def draw(self, scrn):
         self.room.draw(scrn)
-        #scrn.blit(self.textbox.imagein, (self.textbox.rectin.x, self.textbox.rectin.y))
         self.textbox.draw(scrn)
 
     def update(self, pos, words=None):
         """Changes the model based upon new information"""
-        #for r in self.allrooms:
-            #r.update()
+
         if words:
             self.textbox.update(words)
-            #print(self.textbox.text)
-            #self.draw(scrn)
         for key in self.allrooms:
             self.allrooms[key].update(pos)
-        self.inventory.update()
-
+        for item in self.room.items:
+            if item.hidd and item.take:
+                self.inventory.add_item(item)
 
 class PygameWindowView(object):
     def __init__(self, model, size):
@@ -193,7 +194,7 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             self.model.update(pos)
-            
+
         if event.type != KEYDOWN:
             return
         if self.model.eventflags.get('1')==True:
@@ -201,7 +202,7 @@ class MouseController(object):
             if event.key == pygame.K_j:
                 self.model.eventflags['1']=False
                 self.model.eventflags['2']=True
-                self.model.textbox.update(self.model.messages['scene2'])
+                self.model.textbox.update(self.model.messages['scene3'])
             if event.key == pygame.K_k:
                 self.model.eventflags['1']=False
                 self.model.textbox.update(self.model.messages['scene1'])
