@@ -1,6 +1,6 @@
 #FinalProj
 
-Sam’s Space Adventure Odyssey 2: The Reckoning
+Void Boat Odyssey 2: The Reckoning
 
 Authors:
 Chibueze Alfred-Igbokwe, Hadleigh Nunes, Jordan Crawford-O’Banner

@@ -123,36 +123,36 @@ class Narrative(object):
     def scene1(self,model):
         model.update('You pressed the red button')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('A door opens to your right')
         actuallydraw()
     def scene2(self,model):
         model.update('You pressed the blue button')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Congratulations...you suck')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Game Over')
         actuallydraw()
     def scene3(self,model):
         model.update('You pressed the green button')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Unfortunately nothing happened. You stay until you die of thirst')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Game Over')
         actuallydraw
 
     def intro(self,model):
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('You are now in the bridge')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('There is a paper clip and toothbrush and stapler')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('j:paper clip k:toothbrush l:stapler')
         actuallydraw()
 
@@ -160,28 +160,28 @@ class Narrative(object):
     def scene4(self,model):
         model.update('You picked up the paper clip')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('You stab yourself in the eye')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('You die')
         actuallydraw()
     def scene5(self,model):
         model.update('You picked up the toothbrush')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Why would you ever need a toothbrush you idiot')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Game Over')
         actuallydraw()
     def scene6(self,model):
         model.update('You picked up the stapler')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Sadly it has no use to you because youre not Mcgyver')
         actuallydraw()
-        pygame.time.wait(1005)
+        pygame.time.wait(2005)
         model.update('Game Over')
         actuallydraw()
 
@@ -237,6 +237,7 @@ class MouseController(object):
                 story.scene6(self.model)
                 story.events['2']=False
 
+
 class PygameWindowView(object):
     """Draws the model"""
     def __init__(self, model, width = 640,height = 480):
@@ -275,13 +276,13 @@ if __name__ == '__main__':
 
     Modl.update('You have awoke inside of a room.')
     actuallydraw()
-    pygame.time.wait(1005)
+    pygame.time.wait(2005)
     Modl.update('In it you see three buttons, one red, one blue and one green.')
     actuallydraw()
-    pygame.time.wait(1005)
+    pygame.time.wait(2005)
     Modl.update('What do you do?')
     actuallydraw()
-    pygame.time.wait(1005)
+    pygame.time.wait(2005)
     Modl.update('j: red k: blue l: green')
     actuallydraw()
 
