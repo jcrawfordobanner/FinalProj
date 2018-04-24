@@ -1,6 +1,6 @@
 #Draws the model onto the view screen
 
-import pygame
+#import pygame
 
 class PygameWindowView(object):
     def __init__(self, model, size):
