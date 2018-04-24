@@ -3,6 +3,7 @@
 import pygame
 from pygame.locals import*
 import time
+import narrative
 
 
 class Backdrop(object):
@@ -75,20 +76,25 @@ class Textbox(pygame.Surface):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, img, loc, scl = 1):
+    def __init__(self, name, filename, loc, scl, take = False):
         pygame.sprite.Sprite.__init__(self)
-        self.image= ratio_scale(img, scl)
+        im = pygame.image.load(filename)
+        orig_size = im.get_rect()
+        image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
+        self.image= image
         self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        self.name = name
         self.loc = loc
         self.hidd= False
-        self.take = True
+        self.take = take
+
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
     def click(self,pos):
         if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
-            return True
+            return self.name
         else:
             return False
 
@@ -101,7 +107,6 @@ class Item(pygame.sprite.Sprite):
 class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
-        self.takeable_items = []
         self.items = []
     def add_item(self, item):
         self.items.append(item)
@@ -121,6 +126,7 @@ class Room(pygame.sprite.LayeredUpdates):
             if not item.hidd:
                 self.items_vis.append(item)
 
+
     def draw(self, scrn):
         self.backdrop.draw(scrn)
         for item in self.items_vis:
@@ -128,39 +134,30 @@ class Room(pygame.sprite.LayeredUpdates):
 
     def update(self, pos):
         for item in self.items_vis:
-            if item.click(pos):
+            if item.click(pos) and item.take:
                 self.items_vis.remove(item)
             item.update(pos)
-
-
-# class Narrative(object):
-#     def __init__(self):
-#         self.events = {'1':False,'2':False,'3':False,'4':False,'5':False}
-#         # self.model=model
-#         self.event_msgs = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
-#                 "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
 
 
 class SpaceGameModel(object):
     """Model of the game"""
     def __init__(self, size, rooms):
         self.allrooms = rooms #dictionary of all rooms
-        self.room = self.allrooms["bridge"]
+        self.room = self.allrooms["startRoom"]
         self.inventory = Inventory()
         self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
-        self.messages = {"bridge_intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler',
-                'j:paper clip k:toothbrush l:stapler'),
-                "scene1":('You pressed the red button', 'A door opens to your right'),
-                'scene2':('You pressed the green button', 'Unfortunately nothing happened. You stay until you die of thirst', 'Game Over'),
-                "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
-                'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green')}
- # dictionary of all possible messages to be displayed on the textbox
+        self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
 
 
     def draw(self, scrn):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
+
+    def get_clicked(self, pos):
+        for item in self.room.items:
+            clicked_item = item.click(pos)
+        return clicked_item
 
     def update(self, pos, words=None):
         """Changes the model based upon new information"""
@@ -194,51 +191,30 @@ class MouseController(object):
         """ Event handler"""
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
-            self.model.update(pos)
+            itemC = self.model.get_clicked(pos)
+            msg = self.model.messages.get(itemC)
+            self.model.update(pos, msg)
 
         if event.type != KEYDOWN:
             return
-        if self.model.eventflags.get('1')==True:
-            self.model.textbox.update(self.model.messages['game_intro'])
-            if event.key == pygame.K_j:
-                self.model.eventflags['1']=False
-                self.model.eventflags['2']=True
-                self.model.textbox.update(self.model.messages['scene1'])
-            if event.key == pygame.K_k:
-                self.model.eventflags['1']=False
-                self.model.textbox.update(self.model.messages['scene3'])
-            if event.key == pygame.K_l:
-                self.model.textbox.update(self.model.messages['scene2'])
-                self.model.eventflags['1']=False
-            return
 
-        # elif story.events.get('2')==True:
-        #     if event.key == pygame.K_j:
-        #         story.scene4(self.model)
-        #         story.events['2']=False
-        #     if event.key == pygame.K_k:
-        #         story.scene5(self.model)
-        #         story.events['2']=False
-        #     if event.key == pygame.K_l:
-        #         story.scene6(self.model)
-        #         story.events['2']=False
-        #     return
 
 def ratio_scale(filename, scl_factor):
     im = pygame.image.load(filename)
     orig_size = im.get_rect()
     image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
-    return image
+    return images
 
 if __name__ == '__main__':
     pygame.init()
     size = (1200, 1000)
-    wrench = Item("wrench.png", (200,200), .75)
-    stock = Backdrop("Hallway1.PNG", size)
+    wrench = Item("wrench","wrench.png", (200,200), .75, True)
+    redB1 = Item("scene1", "RedButton.png", (500, 500), .20)
+    hall1 = Backdrop("Hallway1.PNG", size)
     #
     # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
     #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
-    rooms = {'bridge':Room([wrench], stock)}
+    rooms = {'startRoom':Room([wrench, redB1], hall1)}
 
     Modl = SpaceGameModel(size, rooms)
     SCRNtemp = PygameWindowView(Modl,size)
