@@ -9,15 +9,16 @@ from classes import *
 
 if __name__ == '__main__':
     pygame.init()
+    size = (1200, 1000)
+    wrench = Item("wrench.png", (200,200), .75)
+    stock = Backdrop("Hallway1.PNG", size)
+    #
+    # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
+    #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
+    rooms = {'bridge':Room([wrench], stock)}
 
-    wrench = Item("wrench.png", (200,200))
-    wrench.image = pygame.transform.scale(wrench.image, (50, 60))
-    stock = Backdrop("StockPhoto1.jpg", (640, 480))
-    room =  Room({}, [wrench], stock)
-    rooms = {"bridge":room}
-
-    Modl = SpaceGameModel(rooms)
-    SCRNtemp = PygameWindowView(Modl)
+    Modl = SpaceGameModel(size, rooms)
+    SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
 
     running = True
@@ -25,8 +26,10 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-        pygame.time.wait(1000)
-        Modl.update('SHIT ROCK UGH')
+        Contrl.handle_event(event)
         SCRNtemp.draw()
+        time.sleep(.1)
+        #Modl.update('SHIT ROCK UGH')
+
 
     pygame.quit()

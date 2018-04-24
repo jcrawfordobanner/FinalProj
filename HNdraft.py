@@ -60,14 +60,14 @@ class Textbox(pygame.Surface):
         screen.blit(self.imageout, (0, self.rectout.y))
         self.imagein.fill((250,255,255))
         if isinstance(self.text, tuple):
-            loc_y = 0
+            loc_y = 5
             for line in self.text:
                 self.textsurface = self.font.render(line, False,(0,0,0))
-                self.imagein.blit(self.textsurface,(0,loc_y))
-                loc_y += 20
+                self.imagein.blit(self.textsurface,(5,loc_y))
+                loc_y += 25
         elif isinstance(self.text, str):
             self.textsurface = self.font.render(self.text, False,(0,0,0))
-            self.imagein.blit(self.textsurface,(0,0))
+            self.imagein.blit(self.textsurface,(5,5))
         screen.blit(self.imagein, (self.rectin.x,self.rectin.y))
 
     def update(self, words):
@@ -151,6 +151,7 @@ class SpaceGameModel(object):
         self.messages = {"bridge_intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler',
                 'j:paper clip k:toothbrush l:stapler'),
                 "scene1":('You pressed the red button', 'A door opens to your right'),
+                'scene2':('You pressed the green button', 'Unfortunately nothing happened. You stay until you die of thirst', 'Game Over'),
                 "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
                 'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green')}
  # dictionary of all possible messages to be displayed on the textbox
@@ -202,13 +203,13 @@ class MouseController(object):
             if event.key == pygame.K_j:
                 self.model.eventflags['1']=False
                 self.model.eventflags['2']=True
-                self.model.textbox.update(self.model.messages['scene3'])
+                self.model.textbox.update(self.model.messages['scene1'])
             if event.key == pygame.K_k:
                 self.model.eventflags['1']=False
-                self.model.textbox.update(self.model.messages['scene1'])
-            # if event.key == pygame.K_l:
-            #     self.model.textbox.update(self.model.messages['scene3'])
-            #     self.model.events_key['1']=False
+                self.model.textbox.update(self.model.messages['scene3'])
+            if event.key == pygame.K_l:
+                self.model.textbox.update(self.model.messages['scene2'])
+                self.model.eventflags['1']=False
             return
 
         # elif story.events.get('2')==True:
@@ -231,9 +232,9 @@ def ratio_scale(filename, scl_factor):
 
 if __name__ == '__main__':
     pygame.init()
-    size = (1200, 900)
+    size = (1200, 1000)
     wrench = Item("wrench.png", (200,200), .75)
-    stock = Backdrop("StockPhoto1.jpg", size)
+    stock = Backdrop("Hallway1.PNG", size)
     #
     # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
     #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}

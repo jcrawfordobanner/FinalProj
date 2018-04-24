@@ -4,11 +4,11 @@ import time
 
 
 class Backdrop(object):
-    """Makes a pygame surface object using an input picture as the background"""
     def __init__(self, image_name, size):
 
         im = pygame.image.load(image_name)
-        self.image = pygame.transform.scale(im, size)
+        self.size = (size[0], int(size[1]*4/5))
+        self.image = pygame.transform.scale(im, self.size)
         self.rect = self.image.get_rect()
 
     def draw(self, scrn, loc = (0,0)):
@@ -16,105 +16,122 @@ class Backdrop(object):
 
 
 class Textbox(pygame.Surface):
-    """Class object that contains a message and a method to blit it to the screen"""
+    """Changed so that it now takes text argument as a tuple,
+    to make printing lines on the same thing easier"""
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-    def __init__(self, width,height,text='hoi'):
-        pygame.Surface.__init__(self,(width,height))
+    def __init__(self, size, text):
+        pygame.Surface.__init__(self,size)
         pygame.sprite.Sprite.__init__(self)
-
+        self.width = size[0]
+        self.height = size[1]/5
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imageout = pygame.Surface((width,height))
-        self.imageout.fill((255,0,0))
+        self.imageout = pygame.Surface((self.width,self.height))
+        self.imageout.fill((0, 50, 60))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectout = self.imageout.get_rect()
         self.rectout.x=0
-        self.rectout.y=1000
+        self.rectout.y= size[1]- self.height
 
         pygame.sprite.Sprite.__init__(self)
 
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imagein = pygame.Surface((width*0.9,height*0.75))
-        self.imagein.fill((0,255,0))
+        self.imagein = pygame.Surface((self.width*0.9,self.height*0.75))
+        self.imagein.fill((250,255,255))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectin = self.imagein.get_rect()
-        self.rectin.x=0
-        self.rectin.y=1000
+        self.rectin.x=  int((self.width - self.width*0.9)/2)
+        self.rectin.y= size[1]-self.height +  int((self.height-self.height*0.75)/2)
 
         pygame.font.init()
-        myfont = pygame.font.SysFont('Comic Sans MS', 28)
+        self.font = pygame.font.SysFont('Comic Sans MS', 28)
         self.text = text
-        self.textsurface = myfont.render(text, False,(0,0,0))
-        self.imagein.blit(self.textsurface,(0,0))
 
     def draw(self, screen):
-        size=screen.get_size()
-        myfont = pygame.font.SysFont('Comic Sans MS', 28)
-        screen.blit(self.imageout, (0, size[1]-(size[1]/4)))
-        screen.blit(self.imagein, (30,int(size[1]*0.75)+15))
-        self.textsurface = myfont.render(self.text, False,(0,0,0))
-        self.imagein.blit(self.textsurface,(0,0))
+        screen.blit(self.imageout, (0, self.rectout.y))
+        self.imagein.fill((250,255,255))
+        if isinstance(self.text, tuple):
+            loc_y = 5
+            for line in self.text:
+                self.textsurface = self.font.render(line, False,(0,0,0))
+                self.imagein.blit(self.textsurface,(5,loc_y))
+                loc_y += 25
+        elif isinstance(self.text, str):
+            self.textsurface = self.font.render(self.text, False,(0,0,0))
+            self.imagein.blit(self.textsurface,(5,5))
+        screen.blit(self.imagein, (self.rectin.x,self.rectin.y))
 
     def update(self, words):
         self.text = words
 
 
 class Item(pygame.sprite.Sprite):
-    """Class inherits from pygame sprite and contains an interactive feature of the sceen"""
-    def __init__(self, img, loc):
+    def __init__(self, img, loc, scl = 1):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load(img)
-        self.rect = self.image.get_rect()
+        self.image= ratio_scale(img, scl)
+        self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
         self.loc = loc
-        self.clicked = False
+        self.hidd= False
+        self.take = True
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
-    def update(self, click_pos):
-        if self.loc == click_pos: #keeps track of the state of the item
-            self.clicked = True
+    def click(self,pos):
+        if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
+            return True
+        else:
+            return False
+
+    def update(self, pos):
+        if self.click(pos):
+            if self.take:
+                self.hidd = True
 
 
 class Inventory(pygame.sprite.Group):
-    """Inherits from sprite group class, and contains the items the player has collected"""
     def __init__(self):
         pygame.sprite.Group.__init__(self)
+        self.takeable_items = []
         self.items = []
     def add_item(self, item):
         self.items.append(item)
+        self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):
-    """Class containing all of the components of the game for a given room"""
-    def __init__(self, msgs, items, backdrops):
+    def __init__(self, items, backdrops):
         pygame.sprite.LayeredUpdates.__init__(self)
-        self.messages = msgs
-        self.items = items
+
+        self.items = []
+        for item in items:
+            self.add(item)
+            self.items.append(item)
         self.backdrop = backdrops
         self.items_vis = []
-        for i in range(len(items)):
-            if items[i].clicked == False:
-                self.items_vis.append(items[i])
+        for item in self.items:
+            if not item.hidd:
+                self.items_vis.append(item)
 
     def draw(self, scrn):
         self.backdrop.draw(scrn)
         for item in self.items_vis:
             item.draw(scrn)
 
-    def update(self, click_pos):
-        for item in self.items.sprites():
-            item.update(click_pos)
+    def update(self, pos):
+        for item in self.items_vis:
+            if item.click(pos):
+                self.items_vis.remove(item)
+            item.update(pos)
 
-class Narrative(object):
-    def __init__(self):
-        self.events = {}
-
-    #TODO fill this and figure this out
-    pass
+def ratio_scale(filename, scl_factor):
+    im = pygame.image.load(filename)
+    orig_size = im.get_rect()
+    image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
+    return image
