@@ -2,147 +2,128 @@ import pygame
 from pygame.locals import *
 import time
 
+#from model import *
+#from view import *
+#from control import *
+from classes import *
+
+#Draws the model onto the view screen
+
+#import pygame ----
+
 class PygameWindowView(object):
     def __init__(self, model, size):
+        pygame.init()
+        pygame.display.init()
+        self.screen = pygame.display.set_mode(size)
         self.model = model
-        self.model.screen = pygame.display.set_mode(size)
 
     def draw(self):
-        """Draw the current game state to the screen"""
-
-class SpaceGameModel(object):
-    def __init__(self, size):
-        self.scenes = []
-        self.inventory = Inventory()
-        self.width = size[0]
-        self.height = size[1]
-
-    def update(self):
-        """Update the game state"""
-
-
-class Backdrop(pygame.Surface):
-    def __init__(self, image):
-        pygame.Surface.__init__()
-        self.image = image
-
-    def draw(self):
-        self.blit(self.image)
-
-class Background(pygame.Surface):
-    # Constructor. Pass in the color of the block,
-    # and its x and y position
-     def __init__(self,img):
-        self.image, self.rect = load_image(img,-1)
-
-     def draw(self):
+        self.model.room.draw(self.screen)
+        self.model.textbox.draw(self.screen)
         pygame.display.update()
 
-class Textbox(pygame.sprite.Sprite):
+#Keeps track of all of the variables being changed in each scene
+#from classes import * -------
+#from narrative import * -------
+class SpaceGameModel(object):
+    """Model of the game"""
+    def __init__(self, size, rooms):
+        self.allrooms = rooms #dictionary of all rooms
+        self.room = self.allrooms["bridge"]
+        self.inventory = Inventory()
+        self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
+        self.messages = {"bridge_intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler',
+                'j:paper clip k:toothbrush l:stapler'),
+                "scene1":('You pressed the red button', 'A door opens to your right'),
+                'scene2':('You pressed the green button', 'Unfortunately nothing happened. You stay until you die of thirst', 'Game Over'),
+                "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
+                'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green')}
+ # dictionary of all possible messages to be displayed on the textbox
+        self.textbox= Textbox(size, self.messages['game_intro'])
 
-    def __init__(self, color, width, height):
-       # Call the parent class (Sprite) constructor
-       pygame.sprite.Sprite.__init__(self)
+    def update(self, pos, words=None):
+        """Changes the model based upon new information"""
+        #TODO work on the update process
 
-       # Create an image of the block, and fill it with a color.
-       # This could also be an image loaded from the disk.
-       self.image = pygame.Surface([width, height])
-       self.image.fill(color)
-
-       # Fetch the rectangle object that has the dimensions of the image
-       # Update the position of this object by setting the values of rect.x and rect.y
-       self.rect = self.image.get_rect
-
-    def zewords(self,text):
-        pygame.font.init()
-        myfont = pygame.font.SysFont('Comic Sans MS', 28)
-        textsurface = myfont.render(text)
-        self.image.blit(textsurface)
-
-
-class Item(pygame.sprite.Sprite):
-    def __init__(self,img, loc, grp):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_image(img,-1)
-        self.loc = loc
-        self.clicked = False
-        self.group = grp
-
-    def draw(self):
-        pygame.draw.rect(self.img, pygame.Rect(self.rect))
+        if words:
+            self.textbox.update(words)
+        for room in self.allrooms:
+            self.allrooms[room].update(pos) #might be repeating the same process
+        for item in self.room.items:
+            if item.hidd and item.take:
+                self.inventory.add_item(item)
 
 
-    def update(self, click_pos):
-        if self.loc == click_pos:
-            self.clicked = True
-            self.remove()
+#Dictates how the player can interact with the model
+#from model import * -------
 
 
-
-
-class Character(pygame.sprite.Sprite):
-    def __init__(self, loc):
-        pygame.sprite.Sprite.__init__(self)
-
-class Inventory(pygame.sprite.Group):
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-
-
-class Scene(pygame.sprite.LayeredUpdates):
-    def __init__(self):
-        pygame.sprite.LayeredUpdates.__init__(self)
-        self.backgrounds = []
-        self.messages = []
-        self.items = pygame.sprite.Group()
-        self.curren_disp = pygame.sprite.Group
-
-    def draw(self):
-        self.
-        self.messages.draw()
-        self.items.draw()
-
-    def update(self, click_pos):
-        for item in self.items.sprites():
-            item.update(click_pos)
-        pygame.sprite.Group.
-
-class PyGameController(object):
+class MouseController(object):
     """ Handles input for space game """
-    def __init__(self,model):
+    def __init__(self, model):
         self.model = model
 
-    def handle_event(self,event):
+    def handle_event(self, event):
         """ Event handler"""
+        if event.type == MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            self.model.update(pos)
+
         if event.type != KEYDOWN:
             return
-        if event.key == pygame.K_LEFT:
-            #action
-        if event.key == pygame.K_RIGHT:
-            #action
+        if self.model.eventflags.get('1')==True:
+            self.model.textbox.update(self.model.messages['game_intro'])
+            if event.key == pygame.K_j:
+                self.model.textbox.update(self.model.messages['scene1'])
+                self.model.eventflags['1']=False
+                self.model.eventflags['2']=True
+            if event.key == pygame.K_k:
+                self.model.eventflags['1']=False
+                self.model.textbox.update(self.model.messages['scene2'])
+            if event.key == pygame.K_l:
+                self.model.textbox.update(self.model.messages['scene3'])
+                self.model.eventflags['1']=False
+            return
 
-
-
+        if self.model.eventflags.get('2')==True:
+            self.model.textbox.update(self.model.messages['game_intro'])
+            if event.key == pygame.K_j:
+                self.model.textbox.update(self.model.messages['scene1'])
+                self.model.eventflags['1']=False
+                self.model.eventflags['2']=True
+            if event.key == pygame.K_k:
+                self.model.eventflags['1']=False
+                self.model.textbox.update(self.model.messages['scene2'])
+            if event.key == pygame.K_l:
+                self.model.textbox.update(self.model.messages['scene3'])
+                self.model.eventflags['1']=False
+            return
 
 
 if __name__ == '__main__':
     pygame.init()
+    size = (1200, 1000)
+    wrench = Item("wrench.png", (200,200), .75)
+    stock = Backdrop("Hallway1.PNG", size)
+    #
+    # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
+    #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
+    rooms = {'bridge':Room([wrench], stock)}
 
-    size = (640, 480)
-
-    model = SpaceGameModel
-    view = PyGameWindowView(model, size)
-    controller = PyGameController(model)
+    Modl = SpaceGameModel(size, rooms)
+    SCRNtemp = PygameWindowView(Modl,size)
+    Contrl = MouseController(Modl)
 
     running = True
     while running:
         for event in pygame.event.get():
-            if event.type == QUIT:
-                running = False
-            controller.handle_event(event)
-        model.update()
-        view.draw()
-        time.sleep(.001)
+            if event.type == pygame.QUIT:
+                running=False
+        Contrl.handle_event(event)
+        SCRNtemp.draw()
+        time.sleep(.1)
+        #Modl.update('SHIT ROCK UGH')
+
 
     pygame.quit()
