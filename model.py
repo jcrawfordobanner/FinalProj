@@ -1,6 +1,6 @@
 #Keeps track of all of the variables being changed in each scene
 from classes import *
-
+import narrative.py
 class SpaceGameModel(object):
     """Model of the game"""
     def __init__(self, size, rooms):
