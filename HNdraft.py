@@ -141,13 +141,13 @@ class Room(pygame.sprite.LayeredUpdates):
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, size, rooms):
+    def __init__(self, size, rooms, doors):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
         self.inventory = Inventory()
-        self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
+        self.doors = doors
 
 
     def draw(self, scrn):
@@ -165,10 +165,14 @@ class SpaceGameModel(object):
         if words:
             self.textbox.update(words)
         for key in self.allrooms:
-            self.allrooms[key].update(pos)
+             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
                 self.inventory.add_item(item)
+        # if self.get_clicked(pos) in self.doors:
+        #     self.room = self.allrooms[self.doors.get(self.get_clicked(pos))]
+
+
 
 class PygameWindowView(object):
     def __init__(self, model, size):
@@ -192,8 +196,19 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
+            print(itemC)
             msg = self.model.messages.get(itemC)
+            door = self.model.doors.get(itemC)
+            if door:
+                self.model.room = self.model.allrooms[door]
+                print(self.model.room)
             self.model.update(pos, msg)
+
+
+            # if self.model.doors.get(itemC):
+            #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
+            #     self.model.update(pos)
+            #     print(self.model.room)
 
         if event.type != KEYDOWN:
             return
@@ -211,12 +226,16 @@ if __name__ == '__main__':
     wrench = Item("wrench","wrench.png", (200,200), .75, True)
     redB1 = Item("scene1", "RedButton.png", (500, 500), .20)
     hall1 = Backdrop("Hallway1.PNG", size)
+    fakerm = Backdrop("stockShip1.jpg", size)
+
+
     #
     # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
     #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
-    rooms = {'startRoom':Room([wrench, redB1], hall1)}
+    rooms = {'startRoom':Room([wrench, redB1], hall1), 'fakeroom':Room([],fakerm)}
+    doors ={"scene1":"fakeroom"}
 
-    Modl = SpaceGameModel(size, rooms)
+    Modl = SpaceGameModel(size, rooms, doors)
     SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
 
