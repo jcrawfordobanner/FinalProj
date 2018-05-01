@@ -93,8 +93,12 @@ class Item(pygame.sprite.Sprite):
         scrn.blit(self.image, self.loc)
 
     def click(self,pos):
-        if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
+        if pygame.Rect(self.Rect).collidepoint(pos[0], pos[1]):
             return self.name
+            print(self.name)
+        if pos[0] in range(self.loc[0], self.loc[0] + self.Rect.width):
+            if pos[1] in range(self.loc[1], self.loc[1]+self.Rect.height):
+                return self.name
         else:
             return False
 
@@ -155,8 +159,10 @@ class SpaceGameModel(object):
         self.textbox.draw(scrn)
 
     def get_clicked(self, pos):
+        clicked_item = False
         for item in self.room.items:
-            clicked_item = item.click(pos)
+            if item.click(pos):
+                clicked_item = item.click(pos)
         return clicked_item
 
     def update(self, pos, words = None):
@@ -165,7 +171,7 @@ class SpaceGameModel(object):
         if words:
             self.textbox.update(words)
         for key in self.allrooms:
-             self.allrooms[key].update(pos)
+            self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
                 self.inventory.add_item(item)
@@ -200,7 +206,7 @@ class MouseController(object):
             door = self.model.doors.get(itemC)
             if door:
                 self.model.room = self.model.allrooms[door]
-                print(self.model.room)
+                # print(self.model.room)
             self.model.update(pos, msg)
 
 
@@ -221,19 +227,16 @@ def ratio_scale(filename, scl_factor):
 
 if __name__ == '__main__':
     pygame.init()
-    size = (1200, 1000)
+    size = (1152,864+36) #(2048, 1536)
     wrench = Item("wrench","wrench.png", (200,200), .75, True)
-    redB1 = Item("scene1", "Rbutton1.PNG", (300, 400), .7)
-    greenB1 = Item("greenB1", "Gbutton1.PNG", (200, 200), .7)
+    redB1 = Item('scene1', 'Rbutton1.PNG', (550, 500), .75)
+    greenB1 = Item("greenB1", "Gbutton1.PNG", (600, 500), .75)
+    blueB1 = Item('blueB1', 'Bbutton1.PNG', (650, 500), .75)
     hall1 = Backdrop("Hallway1.PNG", size)
-    bridge = Backdrop("Bridge.PNG", size)
-    fakerm = Backdrop("stockShip1.jpg", size)
+    bridge = Room([greenB1, redB1, blueB1], Backdrop("Bridge.PNG", size))
 
 
-    #
-    # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
-    #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
-    rooms = {'hallway':Room([], hall1), 'startRoom':Room([wrench, redB1, greenB1], bridge)}
+    rooms = {"hallway":Room([wrench], hall1), 'startRoom':bridge}
     doors ={"scene1":"hallway"}
 
     Modl = SpaceGameModel(size, rooms, doors)
@@ -247,8 +250,7 @@ if __name__ == '__main__':
                 running=False
         Contrl.handle_event(event)
         SCRNtemp.draw()
-        time.sleep(.1)
+        time.sleep(.05)
         #Modl.update('SHIT ROCK UGH')
-
 
     pygame.quit()

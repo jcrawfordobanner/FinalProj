@@ -1,12 +1,19 @@
+from classes import *
+import narrative
+import pygame
+from pygame.locals import*
+import time
+
+
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, size, rooms):
+    def __init__(self, size, rooms, doors):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
         self.inventory = Inventory()
-        self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
+        self.doors = doors
 
 
     def draw(self, scrn):
@@ -14,11 +21,13 @@ class SpaceGameModel(object):
         self.textbox.draw(scrn)
 
     def get_clicked(self, pos):
+        clicked_item = False
         for item in self.room.items:
-            clicked_item = item.click(pos)
+            if item.click(pos):
+                clicked_item = item.click(pos)
         return clicked_item
 
-    def update(self, pos, words=None):
+    def update(self, pos, words = None):
         """Changes the model based upon new information"""
 
         if words:

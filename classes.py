@@ -73,20 +73,29 @@ class Textbox(pygame.Surface):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, img, loc, scl = 1):
+    def __init__(self, name, filename, loc, scl, take = False):
         pygame.sprite.Sprite.__init__(self)
-        self.image= ratio_scale(img, scl)
+        im = pygame.image.load(filename)
+        orig_size = im.get_rect()
+        image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
+        self.image= image
         self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        self.name = name
         self.loc = loc
         self.hidd= False
-        self.take = True
+        self.take = take
+
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
     def click(self,pos):
-        if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
-            return True
+        if pygame.Rect(self.Rect).collidepoint(pos[0], pos[1]):
+            return self.name
+            print(self.name)
+        if pos[0] in range(self.loc[0], self.loc[0] + self.Rect.width):
+            if pos[1] in range(self.loc[1], self.loc[1]+self.Rect.height):
+                return self.name
         else:
             return False
 
@@ -99,7 +108,6 @@ class Item(pygame.sprite.Sprite):
 class Inventory(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
-        self.takeable_items = []
         self.items = []
     def add_item(self, item):
         self.items.append(item)
@@ -119,6 +127,7 @@ class Room(pygame.sprite.LayeredUpdates):
             if not item.hidd:
                 self.items_vis.append(item)
 
+
     def draw(self, scrn):
         self.backdrop.draw(scrn)
         for item in self.items_vis:
@@ -126,12 +135,6 @@ class Room(pygame.sprite.LayeredUpdates):
 
     def update(self, pos):
         for item in self.items_vis:
-            if item.click(pos):
+            if item.click(pos) and item.take:
                 self.items_vis.remove(item)
             item.update(pos)
-
-def ratio_scale(filename, scl_factor):
-    im = pygame.image.load(filename)
-    orig_size = im.get_rect()
-    image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
-    return image
