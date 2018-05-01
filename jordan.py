@@ -1,14 +1,17 @@
+"Hadleigh's working doc"
+
 import pygame
 from pygame.locals import*
 import time
+import narrative
 
-flag1=False
 
 class Backdrop(object):
     def __init__(self, image_name, size):
 
         im = pygame.image.load(image_name)
-        self.image = pygame.transform.scale(im, size)
+        self.size = (size[0], int(size[1]*4/5))
+        self.image = pygame.transform.scale(im, self.size)
         self.rect = self.image.get_rect()
 
     def draw(self, scrn, loc = (0,0)):
@@ -16,77 +19,90 @@ class Backdrop(object):
 
 
 class Textbox(pygame.Surface):
+    """Changed so that it now takes text argument as a tuple,
+    to make printing lines on the same thing easier"""
 
     # Constructor. Pass in the color of the block,
     # and its x and y position
-    def __init__(self, width,height,text=''):
-        pygame.Surface.__init__(self,(width,height))
+    def __init__(self, size, text):
+        pygame.Surface.__init__(self,size)
         pygame.sprite.Sprite.__init__(self)
-
+        self.width = size[0]
+        self.height = size[1]/5
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imageout = pygame.Surface((width,height))
-        self.imageout.fill((255,0,0))
+        self.imageout = pygame.Surface((self.width,self.height))
+        self.imageout.fill((0, 50, 60))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectout = self.imageout.get_rect()
         self.rectout.x=0
-        self.rectout.y=1000
+        self.rectout.y= size[1]- self.height
 
         pygame.sprite.Sprite.__init__(self)
 
         # Create an image of the block, and fill it with a color.
         # This could also be an image loaded from the disk.
-        self.imagein = pygame.Surface((width*0.9,height*0.75))
-        self.imagein.fill((0,255,0))
+        self.imagein = pygame.Surface((self.width*0.9,self.height*0.75))
+        self.imagein.fill((250,255,255))
 
         # Fetch the rectangle object that has the dimensions of the image
         # Update the position of this object by setting the values of rect.x and rect.y
         self.rectin = self.imagein.get_rect()
-        self.rectin.x=0
-        self.rectin.y=1000
+        self.rectin.x=  int((self.width - self.width*0.9)/2)
+        self.rectin.y= size[1]-self.height +  int((self.height-self.height*0.75)/2)
 
         pygame.font.init()
-        myfont = pygame.font.SysFont('Comic Sans MS', 28)
+        self.font = pygame.font.SysFont('Comic Sans MS', 28)
         self.text = text
-        self.textsurface = myfont.render(text, False,(0,0,0))
-        self.imagein.blit(self.textsurface,(0,0))
-
-        self.width=width
-        self.height=height
 
     def draw(self, screen):
-        size=screen.get_size()
-        myfont = pygame.font.SysFont('Comic Sans MS', 28)
-        screen.blit(self.imageout, (0, size[1]-(size[1]/4)))
-        screen.blit(self.imagein, (30,int(size[1]*0.75)+15))
-        self.imagein.fill((0,255,0))
-        self.textsurface = myfont.render(self.text, False,(0,0,0))
-        self.imagein.blit(self.textsurface,(0,0))
+        screen.blit(self.imageout, (0, self.rectout.y))
+        self.imagein.fill((250,255,255))
+        if isinstance(self.text, tuple):
+            loc_y = 5
+            for line in self.text:
+                self.textsurface = self.font.render(line, False,(0,0,0))
+                self.imagein.blit(self.textsurface,(5,loc_y))
+                loc_y += 25
+        elif isinstance(self.text, str):
+            self.textsurface = self.font.render(self.text, False,(0,0,0))
+            self.imagein.blit(self.textsurface,(5,5))
+        screen.blit(self.imagein, (self.rectin.x,self.rectin.y))
 
     def update(self, words):
         self.text = words
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, img, loc):
+    def __init__(self, name, filename, loc, scl, take = False):
         pygame.sprite.Sprite.__init__(self)
-        self.image= pygame.image.load(img) #see if needs fixing
-        self.rect = self.image.get_rect()
+        im = pygame.image.load(filename)
+        orig_size = im.get_rect()
+        image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
+        self.image= image
+        self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        self.name = name
         self.loc = loc
-        self.clicked = False
+        self.hidd= False
+        self.take = take
+
 
     def draw(self, scrn):
         scrn.blit(self.image, self.loc)
 
-    def update(self, click_pos):
-        if self.loc == click_pos:
-            self.clicked = True
+    def click(self,pos):
+        if pygame.Rect(self.Rect).collidepoint( pos[0], pos[1]):
+            return self.name
+        else:
+            return False
 
-class Character(pygame.sprite.Sprite):
-    def __init__(self, loc):
-        pygame.sprite.Sprite.__init__(self)
+    def update(self, pos):
+        if self.click(pos):
+            if self.take:
+                self.hidd = True
+
 
 class Inventory(pygame.sprite.Group):
     def __init__(self):
@@ -94,115 +110,77 @@ class Inventory(pygame.sprite.Group):
         self.items = []
     def add_item(self, item):
         self.items.append(item)
+        self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):
-    def __init__(self, msgs, items, backdrops):
+    def __init__(self, items, backdrops):
         pygame.sprite.LayeredUpdates.__init__(self)
-        self.messages = msgs
-        self.items = items
+
+        self.items = []
+        for item in items:
+            self.add(item)
+            self.items.append(item)
         self.backdrop = backdrops
         self.items_vis = []
-        for i in range(len(items)):
-            if items[i].clicked == False:
-                self.items_vis.append(items[i])
+        for item in self.items:
+            if not item.hidd:
+                self.items_vis.append(item)
+
 
     def draw(self, scrn):
         self.backdrop.draw(scrn)
         for item in self.items_vis:
             item.draw(scrn)
 
-    def update(self, click_pos):
-        for item in self.items.sprites():
-            item.update(click_pos)
-
-class Narrative(object):
-    def __init__(self,model):
-        self.events = {'1':False,'2':False,'3':False,'4':False,'5':False}
-        self.model=model
-
-    def scene1(self,model):
-        model.update('You pressed the red button')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('A door opens to your right')
-        actuallydraw()
-    def scene2(self,model):
-        model.update('You pressed the blue button')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Congratulations...you suck')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Game Over')
-        actuallydraw()
-    def scene3(self,model):
-        model.update('You pressed the green button')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Unfortunately nothing happened. You stay until you die of thirst')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Game Over')
-        actuallydraw
-
-    def intro(self,model):
-        pygame.time.wait(2005)
-        model.update('You are now in the bridge')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('There is a paper clip and toothbrush and stapler')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('j:paper clip k:toothbrush l:stapler')
-        actuallydraw()
-
-
-    def scene4(self,model):
-        model.update('You picked up the paper clip')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('You stab yourself in the eye')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('You die')
-        actuallydraw()
-    def scene5(self,model):
-        model.update('You picked up the toothbrush')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Why would you ever need a toothbrush you idiot')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Game Over')
-        actuallydraw()
-    def scene6(self,model):
-        model.update('You picked up the stapler')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Sadly it has no use to you because youre not Mcgyver')
-        actuallydraw()
-        pygame.time.wait(2005)
-        model.update('Game Over')
-        actuallydraw()
+    def update(self, pos):
+        for item in self.items_vis:
+            if item.click(pos) and item.take:
+                self.items_vis.remove(item)
+            item.update(pos)
 
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, rooms):
-        self.allrooms = rooms
-        self.room = self.allrooms["bridge"]
+    def __init__(self, size, rooms):
+        self.allrooms = rooms #dictionary of all rooms
+        self.room = self.allrooms["startRoom"]
         self.inventory = Inventory()
-        self.textbox=Textbox(640,480/4)
+        self.eventflags = {'1':True,'2':False,'3':False,'4':False,'5':False}
+        self.messages = narrative.messages
+        self.textbox= Textbox(size, self.messages['game_intro'])
+
+
     def draw(self, scrn):
         self.room.draw(scrn)
         self.textbox.draw(scrn)
 
-    def update(self,words=''):
+    def get_clicked(self, pos):
+        for item in self.room.items:
+            clicked_item = item.click(pos)
+        return clicked_item
 
+    def update(self, pos, words=None):
         """Changes the model based upon new information"""
-        #for r in self.allrooms:
-            #r.update()
-        self.textbox.update(words)
+
+        if words:
+            self.textbox.update(words)
+        for key in self.allrooms:
+            self.allrooms[key].update(pos)
+        for item in self.room.items:
+            if item.hidd and item.take:
+                self.inventory.add_item(item)
+
+class PygameWindowView(object):
+    def __init__(self, model, size):
+        pygame.init()
+        pygame.display.init()
+        self.screen = pygame.display.set_mode(size)
+        self.model = model
+
+    def draw(self):
+        self.model.draw(self.screen)
+        pygame.display.update()
+
 
 class MouseController(object):
     """ Handles input for space game """
@@ -211,19 +189,27 @@ class MouseController(object):
 
     def handle_event(self, event):
         """ Event handler"""
+        if event.type == MOUSEBUTTONDOWN:
+            pos = pygame.mouse.get_pos()
+            itemC = self.model.get_clicked(pos)
+            print(itemC)
+            msg = self.model.messages.get(itemC)
+            self.model.update(pos, msg)
+
         if event.type != KEYDOWN:
             return
-        if story.events.get('1')==True:
+        if self.model.eventflags.get('1')==True:
+            pos = pygame.mouse.get_pos()
             if event.key == pygame.K_j:
-                story.scene1(self.model)
-                story.events['1']=False
-                story.events['2']=True
+                self.model.update(pos, self.model.messages.get("scene1"))
+                self.model.eventflags['1']=False
+                self.model.eventflags['2']=True
                 story.intro(self.model)
             if event.key == pygame.K_k:
-                story.scene2(self.model)
-                story.events['1']=False
+                self.model.update(pos, self.model.messages.get("scene2"))
+                self.model.eventflags['1']=False
             if event.key == pygame.K_l:
-                story.scene3(self.model)
+                self.model.update(pos, self.model.messages.get("scene3"))
                 story.events['1']=False
 
         elif story.events.get('2')==True:
@@ -238,61 +224,37 @@ class MouseController(object):
                 story.events['2']=False
 
 
-class PygameWindowView(object):
-    """Draws the model"""
-    def __init__(self, model, width = 640,height = 480):
-        pygame.init()
-        size = (width,height)
-        pygame.display.init()
-        self.screen = pygame.display.set_mode(size)
-        self.model = model
 
-    def draw(self):
-        self.model.draw(self.screen)
-        pygame.display.update()
-
-current_event = 0
-
-
+def ratio_scale(filename, scl_factor):
+    im = pygame.image.load(filename)
+    orig_size = im.get_rect()
+    image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
+    return images
 
 if __name__ == '__main__':
     pygame.init()
-    wrench = Item("wrench.png", (200,200))
-    wrench.image = pygame.transform.scale(wrench.image, (50, 60))
-    stock = Backdrop("StockPhoto1.jpg", (640, 480))
-    room =  Room({}, [wrench], stock)
-    rooms = {"bridge":room}
+    size = (1200, 1000)
+    wrench = Item("wrench","wrench.png", (200,200), .75, True)
+    redB1 = Item("scene1", "RedButton.png", (500, 500), .20)
+    hall1 = Backdrop("Hallway1.PNG", size)
+    #
+    # messages = {"intro":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler', 'j:paper clip k:toothbrush l:stapler'), "scene1":('You pressed the red button', 'A door opens to your right'),
+    #         "scene3":('You pressed the blue button', 'Congratulations...you suck', 'Game Over')}
+    rooms = {'startRoom':Room([wrench, redB1], hall1)}
 
-    Modl = SpaceGameModel(rooms)
-    SCRNtemp = PygameWindowView(Modl)
+    Modl = SpaceGameModel(size, rooms)
+    SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
-
-    story =Narrative(Modl)
-
-
-    def actuallydraw():
-            SCRNtemp.draw()
-            SCRNtemp.draw()
-
-    Modl.update('You have awoke inside of a room.')
-    actuallydraw()
-    pygame.time.wait(2005)
-    Modl.update('In it you see three buttons, one red, one blue and one green.')
-    actuallydraw()
-    pygame.time.wait(2005)
-    Modl.update('What do you do?')
-    actuallydraw()
-    pygame.time.wait(2005)
-    Modl.update('j: red k: blue l: green')
-    actuallydraw()
-
-    story.events['1'] = True
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running=False
-            Contrl.handle_event(event)
+        Contrl.handle_event(event)
+        SCRNtemp.draw()
+        time.sleep(.1)
+        #Modl.update('SHIT ROCK UGH')
+
 
     pygame.quit()
