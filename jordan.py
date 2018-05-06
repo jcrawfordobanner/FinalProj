@@ -229,20 +229,24 @@ if __name__ == '__main__':
     size = (1152,864+36) #(2048, 1536)
     wrench = Item("wrench","wrench.png", (200,200), .75, True)
     redB1 = Item('scene1', 'Rbutton1.PNG', (550, 500), .75)
-    greenB1 = Item("greenB1", "Gbutton1.PNG", (600, 500), .75)
-    blueB1 = Item('blueB1', 'Bbutton1.PNG', (650, 500), .75)
+    greenB1 = Item("scene2", "Gbutton1.PNG", (600, 500), .75)
+    blueB1 = Item('scene3', 'Bbutton1.PNG', (650, 500), .75)
     tohall = Item('halldo','docor.jpeg',(400,300),.75)
     tostor = Item('stordo','spook.png',(200,300),.75)
     tocock = Item('cockdo','liki.png',(600,300),.75)
+    tocomm = Item('commdo','vommere.png',(400,300),.10)
     cockpit = Room([tohall],Backdrop("cock.jpg",size))
-    hallway = Room([tostor,tocock,redB1],Backdrop("Hallway1.PNG", size))
+    toobs = Item('cockdo','odoror.png',(600,300),.75)
+    hallway = Room([tostor,tocock,redB1,tocomm],Backdrop("Hallway1.PNG", size))
+    obser = Room([tocomm,toobs],Backdrop("obby.jpg", size))
+    comms = Room([tohall],Backdrop("comm.jpg", size))
     staht = Room([greenB1, redB1, blueB1], Backdrop("blackiv_thumbnail.jpg", size))
     bridge = Room([tohall], Backdrop("Bridge.PNG", size))
     storage = Room([tohall], Backdrop("stormagore.jpg", size))
 
 
-    rooms = {"bridge":bridge, 'startRoom':staht,"hallway":hallway,"storage":storage,"cockpit":cockpit}
-    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit"}
+    rooms = {"bridge":bridge, 'startRoom':staht,"hallway":hallway,"storage":storage,"cockpit":cockpit,"commroom":comms,"observation":obser}
+    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom"}
 
     Modl = SpaceGameModel(size, rooms, doors)
     SCRNtemp = PygameWindowView(Modl,size)
