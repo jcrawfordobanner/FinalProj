@@ -94,7 +94,6 @@ class Item(pygame.sprite.Sprite):
     def click(self,pos):
         if pygame.Rect(self.Rect).collidepoint(pos[0], pos[1]):
             return self.name
-            print(self.name)
         if pos[0] in range(self.loc[0], self.loc[0] + self.Rect.width):
             if pos[1] in range(self.loc[1], self.loc[1]+self.Rect.height):
                 return self.name
@@ -152,6 +151,7 @@ class SpaceGameModel(object):
         self.textbox= Textbox(size, self.messages['game_intro'])
         self.doors = doors
         self.puzzles=puzzles
+        self.choices=0
 
 
     def draw(self, scrn):
@@ -201,18 +201,22 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
+            if itemC:
+                self.model.choices+=1
             #print(itemC)
             #print(itemC+"2")
             msg = self.model.messages.get(itemC)
+
             door = self.model.doors.get(itemC)
-            print(self.model.puzzles.get(itemC))
-            print(self.model.inventor.items)
             if door:
                 self.model.room = self.model.allrooms[door]
                 # print(self.model.room)
             if self.model.puzzles.get(itemC) in self.model.inventor.items:
                 msg = self.model.messages.get(itemC+'2')
-                print(msg)
+            if str(self.model.choices) in self.model.messages and msg!=None:
+                msg = msg + self.model.messages.get(str(self.model.choices))
+            elif str(self.model.choices) in self.model.messages and msg==None:
+                msg=self.model.messages.get(str(self.model.choices))
             self.model.update(pos, msg)
 
 
@@ -220,7 +224,6 @@ class MouseController(object):
             #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
             #     self.model.update(pos)
             #     print(self.model.room)
-
         if event.type != KEYDOWN:
             return
 
@@ -231,9 +234,9 @@ def ratio_scale(filename, scl_factor):
     image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
     return images
 
-if __name__ == '__main__':
-    pygame.init()
+def mainz():
     size = (1152,864+36) #(2048, 1536)
+    Scl = 1152/2048
 
     redB1 = Item('scene1', 'Rbutton1.PNG', (550, 500), .75)
     greenB1 = Item("scene2", "Gbutton1.PNG", (600, 500), .75)
@@ -247,9 +250,9 @@ if __name__ == '__main__':
     tocock = Item('cockdo','liki.png',(600,300),.75)
 
     tocomm = Item('commdo','vommere.png',(400,300),.10)
+    wrench = Item("wrench","wrench.png", (200,200), .75, True)
 
     toobs = Item('obsdo','obdoror.png',(600,300),.75)
-    wrench = Item("wrench","wrench.png", (200,200), .75, True)
 
     toair = Item('airdo','lockor.png',(500,100),.1)
 
@@ -270,18 +273,36 @@ if __name__ == '__main__':
     doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom","obsdo":"observation","airdo":"lock","tankdo":"tank"}
     puzzles ={"unlock":"wrench"}
 
-    Modl = SpaceGameModel(size, rooms, doors,puzzles)
-    SCRNtemp = PygameWindowView(Modl,size)
-    Contrl = MouseController(Modl)
+    return SpaceGameModel(size, rooms, doors,puzzles)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running=False
-        Contrl.handle_event(event)
-        SCRNtemp.draw()
-        time.sleep(.05)
-        #Modl.update('SHIT ROCK UGH')
+if __name__ == '__main__':
+    def main_loop():
+        size = (1152,864+36) #(2048, 1536)
+        pygame.init()
+        running = True
+        gameover=False
+        while running:
+            pygame.display.init()
+            Modl=mainz()
+            SCRNtemp = PygameWindowView(Modl,size)
+            Contrl = MouseController(Modl)
+            while not gameover:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running=False
+                    Contrl.handle_event(event)
+                time.sleep(1/8)
+                SCRNtemp.draw()
+                print(Modl.choices)
+                if Modl.choices>=20:
+                    gameover=True
+            time.sleep(1/8)
+            for event in pygame.event.get():
+                if event.type == KEYDOWN:
+                    if event.key==K_SPACE:
+                        gameover=False
+                    if event.type == pygame.QUIT:
+                        running=False
+        pygame.quit()
 
-    pygame.quit()
+    main_loop()

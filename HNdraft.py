@@ -270,7 +270,7 @@ if __name__ == '__main__':
                 running=False
         Contrl.handle_event(event)
         SCRNtemp.draw()
-        time.sleep(.05)
+        time.sleep(.3)
         #Modl.update('SHIT ROCK UGH')
 
     pygame.quit()
