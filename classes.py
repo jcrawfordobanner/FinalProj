@@ -73,13 +73,19 @@ class Textbox(pygame.Surface):
 
 
 class Item(pygame.sprite.Sprite):
-    def __init__(self, name, filename, loc, scl, take = False):
+    def __init__(self, name, loc, scl, filename = None, take = False):
         pygame.sprite.Sprite.__init__(self)
-        im = pygame.image.load(filename)
-        orig_size = im.get_rect()
-        image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
-        self.image= image
-        self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        if not filename == None:
+            im = pygame.image.load(filename)
+            orig_size = im.get_rect()
+            image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
+            self.image= image
+            self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        else:
+            self.image = pygame.Surface((int(160*scl), int(210*scl)) ) #,  pygame.SRCALPHA, 32)
+            self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+            # self.image.fill((20,20,140))
+
         self.name = name
         self.loc = loc
         self.hidd= False
@@ -110,7 +116,7 @@ class Inventory(pygame.sprite.Group):
         pygame.sprite.Group.__init__(self)
         self.items = []
     def add_item(self, item):
-        self.items.append(item)
+        self.items.append(item.name)
         self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):

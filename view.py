@@ -4,6 +4,8 @@ import pygame
 
 class PygameWindowView(object):
     def __init__(self, model, size):
+        pygame.init()
+        pygame.display.init()
         self.screen = pygame.display.set_mode(size)
         self.model = model
 

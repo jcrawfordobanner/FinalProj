@@ -19,12 +19,22 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
-            # print(itemC)
+            if itemC:
+                self.model.choices+=1
+            #print(itemC)
+            #print(itemC+"2")
             msg = self.model.messages.get(itemC)
+
             door = self.model.doors.get(itemC)
             if door:
                 self.model.room = self.model.allrooms[door]
                 # print(self.model.room)
+            if self.model.puzzles.get(itemC) in self.model.inventor.items:
+                msg = self.model.messages.get(itemC+'2')
+            if str(self.model.choices) in self.model.messages and msg!=None:
+                msg = msg + self.model.messages.get(str(self.model.choices))
+            elif str(self.model.choices) in self.model.messages and msg==None:
+                msg=self.model.messages.get(str(self.model.choices))
             self.model.update(pos, msg)
 
 
@@ -32,6 +42,5 @@ class MouseController(object):
             #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
             #     self.model.update(pos)
             #     print(self.model.room)
-
         if event.type != KEYDOWN:
             return

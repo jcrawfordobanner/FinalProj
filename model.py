@@ -7,13 +7,15 @@ import time
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, size, rooms, doors):
+    def __init__(self, size, rooms, doors,puzzles):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
-        self.inventory = Inventory()
+        self.inventor = Inventory()
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
         self.doors = doors
+        self.puzzles=puzzles
+        self.choices=0
 
 
     def draw(self, scrn):
@@ -36,4 +38,6 @@ class SpaceGameModel(object):
             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
-                self.inventory.add_item(item)
+                self.inventor.add_item(item)
+        # if self.get_clicked(pos) in self.doors:
+        #     self.room = self.allrooms[self.doors.get(self.get_clicked(pos))]
