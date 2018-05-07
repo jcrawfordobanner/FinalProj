@@ -1,5 +1,5 @@
 #File containing all narrative text strings
-messages = {"bridge":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler','j:paper clip k:toothbrush l:stapler'),
+messages = {"bridge":('You are now in the bridge', 'There is a paper clip and toothbrush and stapler'),
             "scene1":('You pressed the red button', 'The lights turn on'),
             "scene3":('You pressed the blue button','Unfortunately nothing happened. You stay until you die of thirst','Game Over'),
             "scene2":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
@@ -13,5 +13,9 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "tank_intro": ("The wall slides open and what looks like the oxygen tank appears before you.","There sure is a lot of steam coming out of it","...that probably isn't good"),
             "obsdo":("Woah","The view in here is beautiful", "Oh look there's a telescope"),
             "commdo":("There sure are a lot of screens in here","Who even needs all of this?"),
-            "unlock":("fuck u"),
-            "unlock2":("AWWWWWWWWWWWWWWWWWWWWWWWWWWWWW FUCCCCCCCCCCCKING HWWWWWWWWWWWWWLLLLLLLLLLLLL YEAHHHHHHHHHHHHHHHHHHHH")}
+            "unlock":("fuck u",""),
+            "unlock2":("AWWWWWWWWWWWWWWWWWWWWWWWWWWWWW FUCCCCCCCCCCCKING HWWWWWWWWWWWWWLLLLLLLLLLLLL YEAHHHHHHHHHHHHHHHHHHHH"),
+            "5":("75 percent left",""),
+            "10":("50 percent left",""),
+            "15":("25 percent left",""),
+            "20":("0 percent left","")}
