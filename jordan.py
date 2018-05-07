@@ -112,7 +112,7 @@ class Inventory(pygame.sprite.Group):
         pygame.sprite.Group.__init__(self)
         self.items = []
     def add_item(self, item):
-        self.items.append(item)
+        self.items.append(item.name)
         self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):
@@ -144,13 +144,14 @@ class Room(pygame.sprite.LayeredUpdates):
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, size, rooms, doors):
+    def __init__(self, size, rooms, doors,puzzles):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
-        self.inventory = Inventory()
+        self.inventor = Inventory()
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
         self.doors = doors
+        self.puzzles=puzzles
 
 
     def draw(self, scrn):
@@ -173,7 +174,7 @@ class SpaceGameModel(object):
             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
-                self.inventory.add_item(item)
+                self.inventor.add_item(item)
         # if self.get_clicked(pos) in self.doors:
         #     self.room = self.allrooms[self.doors.get(self.get_clicked(pos))]
 
@@ -200,12 +201,18 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
-            # print(itemC)
+            #print(itemC)
+            #print(itemC+"2")
             msg = self.model.messages.get(itemC)
             door = self.model.doors.get(itemC)
+            print(self.model.puzzles.get(itemC))
+            print(self.model.inventor.items)
             if door:
                 self.model.room = self.model.allrooms[door]
                 # print(self.model.room)
+            if self.model.puzzles.get(itemC) in self.model.inventor.items:
+                msg = self.model.messages.get(itemC+'2')
+                print(msg)
             self.model.update(pos, msg)
 
 
@@ -227,28 +234,43 @@ def ratio_scale(filename, scl_factor):
 if __name__ == '__main__':
     pygame.init()
     size = (1152,864+36) #(2048, 1536)
-    wrench = Item("wrench","wrench.png", (200,200), .75, True)
+
     redB1 = Item('scene1', 'Rbutton1.PNG', (550, 500), .75)
     greenB1 = Item("scene2", "Gbutton1.PNG", (600, 500), .75)
     blueB1 = Item('scene3', 'Bbutton1.PNG', (650, 500), .75)
+    unlock = Item('unlock', 'special.png', (650, 500), .75)
+
     tohall = Item('halldo','docor.jpeg',(400,300),.75)
+
     tostor = Item('stordo','spook.png',(200,300),.75)
+
     tocock = Item('cockdo','liki.png',(600,300),.75)
+
     tocomm = Item('commdo','vommere.png',(400,300),.10)
+
+    toobs = Item('obsdo','obdoror.png',(600,300),.75)
+    wrench = Item("wrench","wrench.png", (200,200), .75, True)
+
+    toair = Item('airdo','lockor.png',(500,100),.1)
+
+    totank = Item('tankdo','tankor.png',(600,700),.75)
+
     cockpit = Room([tohall],Backdrop("cock.jpg",size))
-    toobs = Item('cockdo','odoror.png',(600,300),.75)
-    hallway = Room([tostor,tocock,redB1,tocomm],Backdrop("Hallway1.PNG", size))
-    obser = Room([tocomm,toobs],Backdrop("obby.jpg", size))
-    comms = Room([tohall],Backdrop("comm.jpg", size))
+    hallway = Room([tostor,redB1,tocomm],Backdrop("Hallway1.PNG", size))
+    obser = Room([tocomm],Backdrop("obby.jpg", size))
+    comms = Room([tohall,toobs,wrench],Backdrop("comm.jpg", size))
+    bridge = Room([tohall,tocock,unlock], Backdrop("Bridge.PNG", size))
     staht = Room([greenB1, redB1, blueB1], Backdrop("blackiv_thumbnail.jpg", size))
-    bridge = Room([tohall], Backdrop("Bridge.PNG", size))
-    storage = Room([tohall], Backdrop("stormagore.jpg", size))
+    storage = Room([tohall, toair, totank], Backdrop("stormagore.jpg", size))
+    oxytank = Room([tostor], Backdrop("tank.jpg", size))
+    airlock = Room([tostor], Backdrop("lcok.jpg", size))
 
 
-    rooms = {"bridge":bridge, 'startRoom':staht,"hallway":hallway,"storage":storage,"cockpit":cockpit,"commroom":comms,"observation":obser}
-    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom"}
+    rooms = {"bridge":bridge, 'startRoom':staht,"hallway":hallway,"storage":storage,"cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
+    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom","obsdo":"observation","airdo":"lock","tankdo":"tank"}
+    puzzles ={"unlock":"wrench"}
 
-    Modl = SpaceGameModel(size, rooms, doors)
+    Modl = SpaceGameModel(size, rooms, doors,puzzles)
     SCRNtemp = PygameWindowView(Modl,size)
     Contrl = MouseController(Modl)
 

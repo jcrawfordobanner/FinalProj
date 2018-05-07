@@ -11,5 +11,7 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "stordo":("You're now in storage","Looks like whoever lived here managed to pile up a whole lot of junk"),
             "cockdo":("It's the pilots bay", "There must be something useful in here"),
             "tank_intro": ("The wall slides open and what looks like the oxygen tank appears before you.","There sure is a lot of steam coming out of it","...that probably isn't good"),
-            "observe_intro":("Woah","The view in here is beautiful", "Oh look there's a telescope"),
-            "commdo":("There sure are a lot of screens in here","Who even needs all of this?")}
+            "obsdo":("Woah","The view in here is beautiful", "Oh look there's a telescope"),
+            "commdo":("There sure are a lot of screens in here","Who even needs all of this?"),
+            "unlock":("fuck u"),
+            "unlock2":("AWWWWWWWWWWWWWWWWWWWWWWWWWWWWW FUCCCCCCCCCCCKING HWWWWWWWWWWWWWLLLLLLLLLLLLL YEAHHHHHHHHHHHHHHHHHHHH")}
