@@ -75,14 +75,22 @@ class Textbox(pygame.Surface):
         self.text = words
 
 
+
+
 class Item(pygame.sprite.Sprite):
-    def __init__(self, name, filename, loc, scl, take = False):
+    def __init__(self, name, loc, scl, filename = None, take = False):
         pygame.sprite.Sprite.__init__(self)
-        im = pygame.image.load(filename)
-        orig_size = im.get_rect()
-        image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
-        self.image= image
-        self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        if not filename == None:
+            im = pygame.image.load(filename)
+            orig_size = im.get_rect()
+            image = pygame.transform.scale(im, (int(orig_size.w*scl), int(orig_size.h*scl)))
+            self.image= image
+            self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+        else:
+            self.image = pygame.Surface((int(160*scl), int(210*scl)) ) #,  pygame.SRCALPHA, 32)
+            self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
+            # self.image.fill((20,20,140))
+
         self.name = name
         self.loc = loc
         self.hidd= False
@@ -206,14 +214,10 @@ class MouseController(object):
             door = self.model.doors.get(itemC)
             if door:
                 self.model.room = self.model.allrooms[door]
+                # msg = self.model.messages.get(door)
                 # print(self.model.room)
             self.model.update(pos, msg)
 
-
-            # if self.model.doors.get(itemC):
-            #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
-            #     self.model.update(pos)
-            #     print(self.model.room)
 
         if event.type != KEYDOWN:
             return
@@ -228,16 +232,32 @@ def ratio_scale(filename, scl_factor):
 if __name__ == '__main__':
     pygame.init()
     size = (1152,864+36) #(2048, 1536)
-    wrench = Item("wrench","wrench.png", (200,200), .75, True)
-    redB1 = Item('scene1', 'Rbutton1.PNG', (550, 500), .75)
-    greenB1 = Item("greenB1", "Gbutton1.PNG", (600, 500), .75)
-    blueB1 = Item('blueB1', 'Bbutton1.PNG', (650, 500), .75)
-    hall1 = Backdrop("Hallway1.PNG", size)
-    bridge = Room([greenB1, redB1, blueB1], Backdrop("Bridge.PNG", size))
+    Scl = 1152/2048
+    wrench = Item("wrench", (200,200), Scl,"wrench.png", True)
+    redB2 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
+    greenB1 = Item("greenB1", (600, 500), Scl, "Gbutton1.PNG")
+    blueB1 = Item('blueB1', (650, 500), Scl, 'Bbutton1.PNG')
+    box1 = Item('box1', (950, 300), Scl, 'Box01.PNG')
+    box2 = Item('box2', (600, 200), Scl, 'Box02.PNG')
+    neato = Item('neato', (550, 450), Scl, 'Neato.PNG' )
+    bugbag = Item('bugbag', (500, 200), Scl, 'InsectProt.PNG')
+    prangle = Item('prangle', (660, 65), Scl, 'Prangle.PNG', True)
+    bluebin = Item('bluebin', (800, 140), Scl, 'BlueBin.PNG')
+    #doors
+    redB1 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
+    tohall = Item('halldo',(350,600), Scl)
+    tostor = Item('stordo',(550,520), Scl)
+    tocock = Item('cockdo',(750,300), Scl)
+    tocomm = Item('commdo',(400,300), Scl)
+    toobs = Item('cockdo',(600,300), Scl)
 
+    hall1 = Room([wrench, tostor], Backdrop("Hallway1.PNG", size))
+    startRoom = Room([greenB1, redB1, blueB1], Backdrop("StartRm.jpg", size))
+    bridge = Room([greenB1, redB2, blueB1, tohall, tocock], Backdrop("Bridge.PNG", size))
+    StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle], Backdrop('StorRoom.PNG', size))
 
-    rooms = {"hallway":Room([wrench], hall1), 'startRoom':bridge}
-    doors ={"scene1":"hallway"}
+    rooms = {"hallway":hall1, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm}
+    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom"}
 
     Modl = SpaceGameModel(size, rooms, doors)
     SCRNtemp = PygameWindowView(Modl,size)
