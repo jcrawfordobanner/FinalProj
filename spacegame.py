@@ -22,7 +22,7 @@ def mainz():
     bugbag = Item('bugbag', (500, 200), Scl, 'InsectProt.PNG')
     prangle = Item('prangle', (460, 65), Scl, 'Prangle.PNG', True)
     bluebin = Item('bluebin', (780, 310), Scl, 'BlueBin.PNG')
-    hdrive = Item('drive', (500, 400), Scl, 'HardDrive.PNG', True)
+    hdrive = Item('drive', (200, 400), Scl, 'HardDrive.PNG', True)
     telescope = Item('tele', (400, 300), Scl, "Telescope.PNG")
     #doors
     redB1 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
@@ -79,7 +79,7 @@ if __name__ == '__main__':
                 time.sleep(1/8)
                 SCRNtemp.draw()
                 print(Modl.choices)
-                if Modl.choices>=50:
+                if Modl.choices>=20:
                     gameover=True
             time.sleep(1/8)
             for event in pygame.event.get():
