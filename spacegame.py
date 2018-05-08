@@ -34,7 +34,7 @@ def mainz():
 
     hall1 = Room([wrench, tostor,redB1,tocomm], Backdrop("Hallway1.PNG", size))
     startRoom = Room([greenB1, redB1, blueB1], Backdrop("StartRm.jpg", size))
-    bridge = Room([greenB1, redB2, blueB1, tohall, tocock], Backdrop("Bridge.PNG", size))
+    bridge = Room([greenB1, redB2, blueB1, tohall, tocock,unlock], Backdrop("Bridge.PNG", size))
     StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle,tohall], Backdrop('StorRoom.PNG', size))
     cockpit = Room([redB1],Backdrop("cock.jpg",size))
     obser = Room([tocomm],Backdrop("obby.jpg", size))
