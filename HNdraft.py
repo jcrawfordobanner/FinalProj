@@ -121,7 +121,7 @@ class Inventory(pygame.sprite.Group):
         pygame.sprite.Group.__init__(self)
         self.items = []
     def add_item(self, item):
-        self.items.append(item)
+        self.items.append(item.name)
         self.add(item)
 
 class Room(pygame.sprite.LayeredUpdates):
@@ -186,7 +186,7 @@ class SpaceGameModel(object):
             if item.hidd and item.take:
                 self.inventor.add_item(item)
         # if self.get_clicked(pos) in self.doors:
-        #     self.room = self.allrooms[self.doors.get(self.get_clicked(pos))]
+
 
 class PygameWindowView(object):
     def __init__(self, model, size):
@@ -217,6 +217,7 @@ class MouseController(object):
             msg = self.model.messages.get(itemC)
 
             door = self.model.doors.get(itemC)
+            # print(self.model.inventor.items)
             if door:
                 self.model.room = self.model.allrooms[door]
                 # print(self.model.room)

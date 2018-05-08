@@ -14,7 +14,7 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "obsdo":("Woah","The view in here is beautiful", "Oh look there's a telescope"),
             "commdo":("There sure are a lot of screens in here","Who even needs all of this?"),
             "unlock":("getta da wrencha",""),
-            "unlock2":("congrats unlocked: made a puzzle"),
+            "unlock2":("congrats unlocked: made a puzzle", ""),
             "5":("75 percent left",""),
             "10":("50 percent left",""),
             "15":("25 percent left",""),

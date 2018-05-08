@@ -22,8 +22,11 @@ def mainz():
     bugbag = Item('bugbag', (500, 200), Scl, 'InsectProt.PNG')
     prangle = Item('prangle', (460, 65), Scl, 'Prangle.PNG', True)
     bluebin = Item('bluebin', (780, 310), Scl, 'BlueBin.PNG')
-    hdrive = Item('drive', (200, 400), Scl, 'HardDrive.PNG', True)
+    hdrive = Item('drive', (200, 450), Scl, 'HardDrive.PNG', True)
     telescope = Item('tele', (400, 300), Scl, "Telescope.PNG")
+    discslot = Item('discslot', (375,425), Scl, 'ComputError.PNG')
+    # discslot = Item('discslot', (370, 420), .5)
+
     #doors
     redB1 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
     tobrid = Item('brido', (1050, 250), Scl)
@@ -44,7 +47,7 @@ def mainz():
     startRoom = Room([greenB1, redB1, blueB1], Backdrop("StartRm.jpg", size))
     bridge = Room([greenB1, redB2, blueB1, b_tohall, tocock], Backdrop("Bridge.PNG", size))
     StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle,tohall, toair, totank], Backdrop('StorRoom.PNG', size))
-    cockpit = Room([p_tobrid],Backdrop("PilotBay.PNG",size))
+    cockpit = Room([p_tobrid, discslot],Backdrop("PilotBay.PNG",size))
     obser = Room([o_tocomm, telescope],Backdrop("Observator.PNG", size))
     comms = Room([c_tohall,toobs, hdrive],Backdrop("CommsRoom.PNG", size))
     oxytank = Room([tostor, unlock], Backdrop("O2tank.PNG", size))
@@ -53,7 +56,7 @@ def mainz():
     rooms = {"hallway":hall1, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
     doors ={'brido':'bridge', "scene1":"bridge","halldo":"hallway", "stordo":"storage", "Hstordo":"storage","cockdo":"cockpit", 'Btohall':"hallway",
             "commdo":"commroom","obsdo":"observation","airdo":"lock","tankdo":"tank", "Ptobrid":"bridge", 'Otocomm':'commroom', 'Ctohall':'hallway'}
-    puzzles ={"unlock":"wrench"}
+    puzzles ={"unlock":"wrench", "discslot":"drive"}
 
     Modl = SpaceGameModel(size, rooms, doors,puzzles)
 
@@ -75,19 +78,25 @@ if __name__ == '__main__':
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running=False
+                        pygame.quit()
+                        return
                     Contrl.handle_event(event)
                 time.sleep(1/8)
                 SCRNtemp.draw()
-                print(Modl.choices)
-                if Modl.choices>=20:
+                # print(Modl.choices)
+                if Modl.choices>=60:
                     gameover=True
-            time.sleep(1/8)
+            # time.sleep(1/8)
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                        running=False
                 if event.type == KEYDOWN:
                     if event.key==K_SPACE:
-                        gameover=False
-                    if event.type == pygame.QUIT:
-                        running=False
-        pygame.quit()
+                        # gameover=False
+                        Modl = mainz()
+                        SCRNtemp.model = Modl
+                        gameover = False
+
+
 
     main_loop()
