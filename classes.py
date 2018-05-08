@@ -82,7 +82,7 @@ class Item(pygame.sprite.Sprite):
             self.image= image
             self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
         else:
-            self.image = pygame.Surface((int(160*scl), int(210*scl)) ) #,  pygame.SRCALPHA, 32)
+            self.image = pygame.Surface((int(160*scl), int(210*scl))  ,  pygame.SRCALPHA, 32)
             self.Rect = pygame.Rect(self.image.get_rect()).move(loc)
             # self.image.fill((20,20,140))
 
