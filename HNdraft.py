@@ -153,13 +153,15 @@ class Room(pygame.sprite.LayeredUpdates):
 
 class SpaceGameModel(object):
     """Model of the game"""
-    def __init__(self, size, rooms, doors):
+    def __init__(self, size, rooms, doors,puzzles):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
-        self.inventory = Inventory()
+        self.inventor = Inventory()
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
         self.doors = doors
+        self.puzzles=puzzles
+        self.choices=0
 
 
     def draw(self, scrn):
@@ -182,7 +184,7 @@ class SpaceGameModel(object):
             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
-                self.inventory.add_item(item)
+                self.inventor.add_item(item)
         # if self.get_clicked(pos) in self.doors:
         #     self.room = self.allrooms[self.doors.get(self.get_clicked(pos))]
 
@@ -209,18 +211,32 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
-            # print(itemC)
+            if itemC:
+                self.model.choices+=1
+            #print(itemC)
+            #print(itemC+"2")
             msg = self.model.messages.get(itemC)
+
             door = self.model.doors.get(itemC)
             if door:
                 self.model.room = self.model.allrooms[door]
-                # msg = self.model.messages.get(door)
                 # print(self.model.room)
+            if self.model.puzzles.get(itemC) in self.model.inventor.items:
+                msg = self.model.messages.get(itemC+'2')
+            if str(self.model.choices) in self.model.messages and msg!=None:
+                msg = msg + self.model.messages.get(str(self.model.choices))
+            elif str(self.model.choices) in self.model.messages and msg==None:
+                msg=self.model.messages.get(str(self.model.choices))
             self.model.update(pos, msg)
 
 
+            # if self.model.doors.get(itemC):
+            #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
+            #     self.model.update(pos)
+            #     print(self.model.room)
         if event.type != KEYDOWN:
             return
+
 
 
 def ratio_scale(filename, scl_factor):
@@ -229,11 +245,11 @@ def ratio_scale(filename, scl_factor):
     image = pygame.transform.scale(im, (int(orig_size.w*scl_factor), int(orig_size.h*scl_factor)))
     return images
 
-if __name__ == '__main__':
-    pygame.init()
+def mainz():
     size = (1152,864+36) #(2048, 1536)
     Scl = 1152/2048
-    wrench = Item("wrench", (200,200), Scl,"wrench.png", True)
+    unlock = Item('unlock', (650, 500),Scl)
+    wrench = Item("wrench", (200,200), Scl,"Wrench.PNG", True)
     redB2 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
     greenB1 = Item("greenB1", (600, 500), Scl, "Gbutton1.PNG")
     blueB1 = Item('blueB1', (650, 500), Scl, 'Bbutton1.PNG')
@@ -245,32 +261,70 @@ if __name__ == '__main__':
     bluebin = Item('bluebin', (800, 140), Scl, 'BlueBin.PNG')
     #doors
     redB1 = Item('scene1', (550, 500), Scl, 'Rbutton1.PNG')
-    tohall = Item('halldo',(350,600), Scl)
-    tostor = Item('stordo',(550,520), Scl)
+    tobrid = Item('brido', (1050, 250), Scl)
+    tohall = Item('halldo',(250,500), Scl)
+    h_tostor = Item('Hstordo',(550,520), Scl)
+    o_tostor = Item('Ostordo', (0, 250), Scl)
     tocock = Item('cockdo',(750,300), Scl)
-    tocomm = Item('commdo',(400,300), Scl)
-    toobs = Item('cockdo',(600,300), Scl)
+    tocomm = Item('commdo',(550,260), Scl)
+    toobs = Item('obsdo',(600,300), Scl)
+    toair = Item('airdo',(500,100),.1)
+    totank = Item('tankdo',(600,700),.75)
 
-    hall1 = Room([wrench, tostor], Backdrop("Hallway1.PNG", size))
+    hall1 = Room([wrench, tostor,tocomm, tobrid], Backdrop("Hallway1.PNG", size))
     startRoom = Room([greenB1, redB1, blueB1], Backdrop("StartRm.jpg", size))
     bridge = Room([greenB1, redB2, blueB1, tohall, tocock], Backdrop("Bridge.PNG", size))
-    StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle], Backdrop('StorRoom.PNG', size))
+    StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle,tohall, toair, totank], Backdrop('StorRoom.PNG', size))
+    cockpit = Room([redB1],Backdrop("PilotBay.PNG",size))
+    obser = Room([tocomm],Backdrop("Observator.PNG", size))
+    comms = Room([tohall,toobs],Backdrop("CommsRoom.PNG", size))
+    oxytank = Room([tostor, unlock], Backdrop("O2tank.PNG", size))
+    airlock = Room([tostor], Backdrop("Airlock.PNG", size))
 
-    rooms = {"hallway":hall1, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm}
-    doors ={"scene1":"bridge","halldo":"hallway","stordo":"storage","cockdo":"cockpit","commdo":"commroom"}
+    rooms = {"hallway":hall1, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
+    doors ={'brido':'bridge', "scene1":"bridge","halldo":"hallway", "Ostordo":"storage", "Hstordo":"storage","cockdo":"cockpit",
+            "commdo":"commroom","obsdo":"observation","airdo":"lock","tankdo":"tank"}
+    puzzles ={"unlock":"wrench"}
 
-    Modl = SpaceGameModel(size, rooms, doors)
-    SCRNtemp = PygameWindowView(Modl,size)
-    Contrl = MouseController(Modl)
+    Modl = SpaceGameModel(size, rooms, doors,puzzles)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running=False
-        Contrl.handle_event(event)
-        SCRNtemp.draw()
-        time.sleep(.3)
-        #Modl.update('SHIT ROCK UGH')
 
-    pygame.quit()
+    return Modl
+
+if __name__ == '__main__':
+    def main_loop():
+        size = (1152,864+36) #(2048, 1536)
+        pygame.init()
+        running = True
+        gameover=False
+        while running:
+            pygame.display.init()
+            Modl=mainz()
+            SCRNtemp = PygameWindowView(Modl,size)
+            Contrl = MouseController(Modl)
+            while not gameover:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running=False
+                        pygame.quit()
+                        return
+                    Contrl.handle_event(event)
+                time.sleep(1/8)
+                SCRNtemp.draw()
+                # print(Modl.choices)
+                if Modl.choices>=20:
+                    gameover=True
+            # time.sleep(1/8)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                        running=False
+                if event.type == KEYDOWN:
+                    if event.key==K_SPACE:
+                        # gameover=False
+                        Modl = mainz()
+                        SCRNtemp.model = Modl
+                        gameover = False
+
+
+
+    main_loop()
