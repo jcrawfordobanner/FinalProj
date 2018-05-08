@@ -16,3 +16,9 @@ Usage:
 
 Website:
 https://sites.google.com/view/voidboat/home
+
+Poster:
+https://github.com/jcrawfordobanner/FinalProj/blob/master/softdesfinal.pdf
+
+Demo:
+https://github.com/jcrawfordobanner/FinalProj/blob/master/softdesfinal.pdf
