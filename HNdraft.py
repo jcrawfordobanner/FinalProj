@@ -175,6 +175,7 @@ class SpaceGameModel(object):
                 clicked_item = item.click(pos)
         return clicked_item
 
+
     def update(self, pos, words = None):
         """Changes the model based upon new information"""
 
@@ -282,6 +283,7 @@ def mainz():
 
     hall1 = Room([wrench, h_tostor,tocomm, tobrid], Backdrop("Hallway1.PNG", size))
     startRoom = Room([greenB1, redB1, blueB1], Backdrop("StartRm.jpg", size))
+    endRoom = startRoom = Room([], Backdrop("StartRm.jpg", size))
     bridge = Room([greenB1, redB2, blueB1, b_tohall, tocock], Backdrop("Bridge.PNG", size))
     StorRm = Room([box1, box2, neato, bluebin, bugbag, prangle,tohall, toair, totank], Backdrop('StorRoom.PNG', size))
     cockpit = Room([p_tobrid, discslot],Backdrop("PilotBay.PNG",size))
@@ -290,7 +292,7 @@ def mainz():
     oxytank = Room([tostor, unlock], Backdrop("O2tank.PNG", size))
     airlock = Room([tostor], Backdrop("Airlock.PNG", size))
 
-    rooms = {"hallway":hall1, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
+    rooms = {"hallway":hall1, "endRoom":endRoom, 'startRoom':startRoom, 'bridge':bridge, 'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
     doors ={'brido':'bridge', "scene1":"bridge","halldo":"hallway", "stordo":"storage", "Hstordo":"storage","cockdo":"cockpit", 'Btohall':"hallway",
             "commdo":"commroom","obsdo":"observation","airdo":"lock","tankdo":"tank", "Ptobrid":"bridge", 'Otocomm':'commroom', 'Ctohall':'hallway'}
     puzzles ={"unlock":"wrench", "discslot":"drive"}
@@ -321,8 +323,10 @@ if __name__ == '__main__':
                 time.sleep(1/8)
                 SCRNtemp.draw()
                 # print(Modl.choices)
-                if Modl.choices>=60:
+                if Modl.choices>=40:
                     gameover=True
+                    # Modl.room = Modl.allrooms['endRoom']
+                    
             # time.sleep(1/8)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
