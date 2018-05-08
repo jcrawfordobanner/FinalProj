@@ -3,7 +3,7 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "scene1":('You pressed the red button', 'The lights turn on',"You find yourself in a room that you can only assume is the bridge"),
             "scene3":('You pressed the blue button','Unfortunately nothing happened. You stay until you die of thirst','Game Over'),
             "scene2":('You pressed the blue button', 'Congratulations...you suck', 'Game Over'),
-            'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?'),
+            'game_intro': ('You have awoke inside of a room.', 'In it you see three buttons, one red, one blue and one green.', 'What do you do?', 'j: red k: blue l: green'),
             "scene4":("You picked up the paper clip","You stab yourself in the eye","You die"),
             "scene5":("You picked up the toothbrush","Why would you ever need a toothbrush you idiot","Game Over"),
             "scene6":("You picked up the stapler","Sadly it has no use to you because you are not Mcgyver","Game Over"),
@@ -33,4 +33,6 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "Ctohall":("Well would you look at that it's a hallway", "There's three doors in front of you","Better hope there's something good in one of 'em"),
             "Btohall":("Well would you look at that it's a hallway", "There's three doors in front of you","Better hope there's something good in one of 'em"),
             "Hstordo":("You're now in storage","Looks like whoever lived here managed to pile up a whole lot of junk"),
-            "Otocomm":("There sure are a lot of screens in here","Who even needs all of this?")}
+            "Otocomm":("There sure are a lot of screens in here","Who even needs all of this?"),
+            "discslot":("looks like some kind of drive goes here", "the computer won't turn on"),
+            "discslot2":("woah, it looks like the computer is booting up")}
