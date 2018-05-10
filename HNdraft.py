@@ -156,12 +156,12 @@ class SpaceGameModel(object):
     def __init__(self, size, rooms, doors,puzzles):
         self.allrooms = rooms #dictionary of all rooms
         self.room = self.allrooms["startRoom"]
-        self.inventor = Inventory()
+        self.inventory = Inventory()
         self.messages = narrative.messages
         self.textbox= Textbox(size, self.messages['game_intro'])
         self.doors = doors
         self.puzzles=puzzles
-        self.choices=0
+        self.choices=40
 
 
     def draw(self, scrn):
@@ -172,12 +172,15 @@ class SpaceGameModel(object):
         clicked_item = False
         for item in self.room.items:
             if item.click(pos):
+                self.choices -= 1
                 clicked_item = item.click(pos)
         return clicked_item
 
 
     def update(self, pos, words = None):
         """Changes the model based upon new information"""
+        if self.choices % 10 == 0:
+            words = words + (str(100*self.choices/40))
 
         if words:
             self.textbox.update(words)
@@ -185,7 +188,7 @@ class SpaceGameModel(object):
             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
-                self.inventor.add_item(item)
+                self.inventory.add_item(item)
         # if self.get_clicked(pos) in self.doors:
 
 
@@ -211,10 +214,6 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
-            if itemC:
-                self.model.choices+=1
-            #print(itemC)
-            #print(itemC+"2")
             msg = self.model.messages.get(itemC)
 
             door = self.model.doors.get(itemC)
@@ -222,7 +221,7 @@ class MouseController(object):
             if door:
                 self.model.room = self.model.allrooms[door]
                 # print(self.model.room)
-            if self.model.puzzles.get(itemC) in self.model.inventor.items:
+            if self.model.puzzles.get(itemC) in self.model.inventory.items:
                 msg = self.model.messages.get(itemC+'2')
             if str(self.model.choices) in self.model.messages and msg!=None:
                 msg = msg + self.model.messages.get(str(self.model.choices))
@@ -326,7 +325,7 @@ if __name__ == '__main__':
                 if Modl.choices>=40:
                     gameover=True
                     # Modl.room = Modl.allrooms['endRoom']
-                    
+
             # time.sleep(1/8)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
