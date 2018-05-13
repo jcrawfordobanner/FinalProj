@@ -23,7 +23,7 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "bugbag":("You're...","You're choosing to not think about consuming this","or think about its existence at all"),
             "prangle":("off brand","in yo hands","ITS PRANGLES"),
             "bluebin":("Oh look more empty useless garbage","no wonder this ships abandoned"),
-            "drive":("Its a computer chip","I mean this is a spaceship","it probably goes to something"),
+            "drive":("Its a computer harddrive","I mean this is a spaceship","it probably goes to something"),
             "tele":("You look out into the void","And find that it is bursting with life and light and beauty"),
             "brido":("You're back in the bridge"," "),
             "Ptobrid":("You're back in the bridge",""),
@@ -32,4 +32,9 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "Hstordo":("You're now in storage","Looks like whoever lived here managed to pile up a whole lot of junk"),
             "Otocomm":("There sure are a lot of screens in here","Who even needs all of this?"),
             "discslot":("looks like some kind of drive goes here", "the computer won't turn on"),
-            "discslot2":("woah, it looks like the computer is booting up")}
+            "discslot2":("woah, it looks like the computer is booting up"),
+            "tospace": ("this is the airlock... you want to go", "out the airlock? Without a space suit?"),
+            "tospace2": ("well, you've launched yourself into space"),
+            "toout1": ("You're at the airlock", "this leads to the cold abyss"),
+            "blueB1": ("this button doesn't really seem to indicate anything"),
+            "greenB1": ("this isn't even a button...", "maybe and indicator light? but what could possibly be goiong right?")}
