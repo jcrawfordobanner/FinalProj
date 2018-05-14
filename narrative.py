@@ -24,7 +24,7 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "prangle":("off brand","in yo hands","ITS PRANGLES"),
             "bluebin":("Oh look more empty useless garbage","no wonder this ships abandoned"),
             "drive":("Its a computer harddrive","I mean this is a spaceship","it probably goes to something"),
-            "tele":("You look out into the void","And find that it is bursting with life and light and beauty"),
+            "tele":("You look out into the void","And find that it is bursting with life and light and beauty", "also, you're pretty sure that eye thing wasn't there before"),
             "brido":("You're back in the bridge"," "),
             "Ptobrid":("You're back in the bridge",""),
             "Ctohall":("Well would you look at that it's a hallway", "There's three doors in front of you","Better hope there's something good in one of 'em"),
@@ -33,8 +33,10 @@ messages = {"bridge":('You are now in the bridge', 'There is a paper clip and to
             "Otocomm":("There sure are a lot of screens in here","Who even needs all of this?"),
             "discslot":("looks like some kind of drive goes here", "the computer won't turn on"),
             "discslot2":("woah, it looks like the computer is booting up"),
-            "tospace": ("this is the airlock... you want to go", "out the airlock? Without a space suit?"),
-            "tospace2": ("well, you've launched yourself into space"),
-            "toout1": ("You're at the airlock", "this leads to the cold abyss"),
+            "locksign": ("well, you've launched yourself into space", "you know you must be suffocating, but strangely you feel fine", "You lock gazes with the abyss..." ),
+            "airdo": ("You're at the airlock", "this leads to the cold abyss", "probably don't touch that lever"),
             "blueB1": ("this button doesn't really seem to indicate anything"),
-            "greenB1": ("this isn't even a button...", "maybe and indicator light? but what could possibly be goiong right?")}
+            "greenB1": ("this isn't even a button...", "maybe and indicator light? but what could possibly be goiong right?"),
+            "winGame":('nice! You fixed the oxygen tank and got the navigation working', "looks like you're headed home...", "wherever that is"),
+            "loseGame": ("no oxygen left...", "everything's going black..."),
+            "tankdo": ("here's the oxygen tank")}

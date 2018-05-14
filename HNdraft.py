@@ -162,6 +162,9 @@ class SpaceGameModel(object):
         self.doors = doors
         self.puzzles=puzzles
         self.choices=40
+        self.solved_puz = {}
+        for key in puzzles:
+            self.solved_puz[key] = False
 
 
     def draw(self, scrn):
@@ -175,25 +178,44 @@ class SpaceGameModel(object):
                 clicked_item = item.click(pos)
         return clicked_item
 
+    def endgame(self):
+        won = True
+        for key in self.solved_puz:
+            if not self.solved_puz[key]:
+                won = False
+
+        if won:
+            words = self.messages['winGame']
+            self.room = self.allrooms["endRoom"]
+            self.textbox.update(words)
+        elif self.choices <= 0:
+            self.room = self.allrooms["endRoom"]
+            words = self.messages['loseGame']
+            self.textbox.update(words)
+
+
 
     def update(self, pos, words = None):
         """Changes the model based upon new information"""
 
+        if self.choices % 10 == 0 and self.solved_puz['unlock'] == False:
+            if words:
+                words = words + ("", str(100*self.choices/40) + " percent oxygen remaining")
+                self.textbox.update(words)
+            elif not words:
+                words = (str(100*self.choices/40) + " percent oxygen remaining")
+                self.textbox.update(words)
 
         if words:
-            if self.choices % 10 == 0:
-                words = words + ("", str(100*self.choices/40) + " percent oxygen remaining")
             self.textbox.update(words)
-        else:
-            if self.choices % 10 == 0:
-                words = ("", str(100*self.choices/40) + " percent oxygen remaining")
-                self.textbox.update(words)
+
         for key in self.allrooms:
             self.allrooms[key].update(pos)
         for item in self.room.items:
             if item.hidd and item.take:
                 self.inventory.add_item(item)
-        # if self.get_clicked(pos) in self.doors:
+
+        self.endgame()
 
 
 class PygameWindowView(object):
@@ -218,9 +240,9 @@ class MouseController(object):
         if event.type == MOUSEBUTTONDOWN:
             pos = pygame.mouse.get_pos()
             itemC = self.model.get_clicked(pos)
-            if itemC:
+            if itemC and self.model.solved_puz['unlock'] == False:
                 self.model.choices -= 1
-                print(itemC)
+                # print(itemC)
 
             msg = self.model.messages.get(itemC)
 
@@ -228,22 +250,18 @@ class MouseController(object):
             # print(self.model.inventory.items)
             if door:
                 self.model.room = self.model.allrooms[door]
-                print(self.model.room)
+                # print(self.model.room)
 
             msg=self.model.messages.get(itemC)
             if self.model.puzzles.get(itemC) in self.model.inventory.items:
                 msg = self.model.messages.get(itemC+'2')
-                locdoor = self.model.doors.get(itemC+'2')
-                if locdoor:
-                    self.model.room = self.model.allrooms[locdoor]
+                self.model.solved_puz[itemC] = True
+
+            if self.model.solved_puz['unlock'] == False and itemC == 'tankdo':
+                msg = self.model.messages["tank_intro"] #this is ugly and hardoced, but I'm too lazy to make it better right now
 
             self.model.update(pos, msg)
 
-
-            # if self.model.doors.get(itemC):
-            #     self.model.room = self.model.allrooms[self.model.doors[itemC]]
-            #     self.model.update(pos)
-            #     print(self.model.room)
         if event.type != KEYDOWN:
             return
 
@@ -273,7 +291,7 @@ def mainz():
     hdrive = Item('drive', (200, 450), Scl, 'HardDrive.PNG', True)
     telescope = Item('tele', (400, 300), Scl, "Telescope.PNG")
     discslot = Item('discslot', (375,425), Scl, 'ComputError.PNG')
-    # toout1 = Item('toout1', (400, 230), .5, 'AirDoor01.png', True)
+    locksign = Item('locksign', (700,400), Scl, "AirlockSign.PNG")
     # discslot = Item('discslot', (370, 420), .5)
 
     #doors
@@ -293,7 +311,6 @@ def mainz():
     toair = Item('airdo',(1070,330),Scl)
     totank = Item('tankdo',(800,100),Scl)
     t_toobs = Item('Tobsdo', (0,0), Scl, 'TeleDoor.PNG')
-    tospace = Item('tospace', (400, 400), Scl)
 
 
     hall1 = Room([wrench, h_tostor,tocomm, tobrid], Backdrop("Hallway1.PNG", size))
@@ -304,16 +321,17 @@ def mainz():
     obser = Room([o_tocomm, telescope],Backdrop("Observator.PNG", size))
     comms = Room([c_tohall,toobs, hdrive],Backdrop("CommsRoom.PNG", size))
     oxytank = Room([tostor, unlock], Backdrop("O2tank.PNG", size))
-    airlock = Room([a_tostor, tospace], Backdrop("Airlock.PNG", size))
+    airlock = Room([a_tostor, locksign], Backdrop("Airlock.PNG", size))
     outAirlock = Room([], Backdrop("SpaceEye1.PNG", size))
     teleView = Room([t_toobs], Backdrop("SpaceEye2.PNG", size))
+    endRoom = Room([], Backdrop("StartRm.jpg", size))
 
     rooms = {"hallway":hall1, 'teleView':teleView, 'outAirlock':outAirlock, 'startRoom':startRoom, 'bridge':bridge,
-            'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock}
+            'storage':StorRm, "cockpit":cockpit,"commroom":comms,"observation":obser,"tank":oxytank,"lock":airlock, "endRoom":endRoom}
     doors ={'brido':'bridge', 'tele':'teleView', "scene1":"bridge", "halldo":"hallway", "stordo":"storage",
             "Hstordo":"storage","cockdo":"cockpit", 'Btohall':"hallway", "commdo":"commroom","obsdo":"observation",
             "airdo":"lock","tankdo":"tank", "Ptobrid":"bridge", 'Otocomm':'commroom', 'Ctohall':'hallway',
-            'Tobsdo':'observation', 'tospace2':'outAirlock', 'Astordo':'storage'}
+            'Tobsdo':'observation', 'locksign': 'outAirlock', 'Astordo':'storage'}
     puzzles ={"unlock":"wrench", "discslot":"drive"}
 
     Modl = SpaceGameModel(size, rooms, doors, puzzles)
